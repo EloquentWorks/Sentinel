@@ -1,0 +1,67 @@
+{
+    "name": "eloquent-works/laravel-sentinal",
+    "description": "Sentinel provides elegant content moderation tools for Laravel applications, including reports, flags, bans, mutes, warnings, and automated moderation workflows.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "eloquent-works",
+        "sentinel",
+        "moderation",
+        "bans"
+    ],
+    "authors": [
+        {
+            "name": "Nicholas Nicholas",
+            "email": "nenglish443@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/contracts": "^11.15|^12.0|^13.0",
+        "illuminate/database": "^11.15|^12.0|^13.0",
+        "illuminate/support": "^11.15|^12.0|^13.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.0",
+        "orchestra/testbench": "^9.0|^10.0|^11.0",
+        "phpunit/phpunit": "^11.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "EloquentWorks\\Sentinel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "EloquentWorks\\Sentinel\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "EloquentWorks\\Sentinel\\SentinelServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "format": "pint",
+        "format:test": "pint --test",
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "test": "phpunit",
+        "quality": [
+            "@format:test",
+            "@analyse",
+            "@test"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
