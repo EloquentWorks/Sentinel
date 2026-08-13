@@ -1,67 +1,50 @@
 {
-    "name": "eloquent-works/laravel-sentinal",
-    "description": "Sentinel provides elegant content moderation tools for Laravel applications, including reports, flags, bans, mutes, warnings, and automated moderation workflows.",
-    "type": "library",
-    "license": "MIT",
-    "keywords": [
-        "laravel",
-        "eloquent-works",
-        "sentinel",
-        "moderation",
-        "bans"
-    ],
-    "authors": [
-        {
-            "name": "Nicholas Nicholas",
-            "email": "nenglish443@gmail.com"
-        }
-    ],
-    "require": {
-        "php": "^8.2",
-        "illuminate/contracts": "^11.15|^12.0|^13.0",
-        "illuminate/database": "^11.15|^12.0|^13.0",
-        "illuminate/support": "^11.15|^12.0|^13.0"
-    },
-    "require-dev": {
-        "larastan/larastan": "^3.0",
-        "laravel/pint": "^1.0",
-        "orchestra/testbench": "^9.0|^10.0|^11.0",
-        "phpunit/phpunit": "^11.5"
-    },
-    "autoload": {
-        "psr-4": {
-            "EloquentWorks\\Sentinel\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "EloquentWorks\\Sentinel\\Tests\\": "tests/"
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "EloquentWorks\\Sentinel\\SentinelServiceProvider"
-            ]
-        }
-    },
-    "scripts": {
-        "format": "pint",
-        "format:test": "pint --test",
-        "analyse": "phpstan analyse --memory-limit=1G",
-        "test": "phpunit",
-        "quality": [
-            "@format:test",
-            "@analyse",
-            "@test"
-        ]
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
-        }
-    },
-    "minimum-stability": "stable",
-    "prefer-stable": true
+  "name": "eloquent-works/sentinel",
+  "description": "A comprehensive Laravel moderation and administration suite with reports, cases, queues, automation, audit logs, Exile enforcement, and Masquerade impersonation.",
+  "type": "library",
+  "license": "MIT",
+  "keywords": ["laravel", "moderation", "admin", "reports", "cases", "bans", "impersonation", "audit", "eloquent-works"],
+  "authors": [{"name": "Eloquent Works"}],
+  "require": {
+    "php": "^8.2",
+    "illuminate/auth": "^12.0|^13.0",
+    "illuminate/cache": "^12.0|^13.0",
+    "illuminate/console": "^12.0|^13.0",
+    "illuminate/contracts": "^12.0|^13.0",
+    "illuminate/database": "^12.0|^13.0",
+    "illuminate/events": "^12.0|^13.0",
+    "illuminate/http": "^12.0|^13.0",
+    "illuminate/routing": "^12.0|^13.0",
+    "illuminate/support": "^12.0|^13.0",
+    "illuminate/validation": "^12.0|^13.0",
+    "eloquent-works/exile": "^1.0",
+    "eloquent-works/masquerade": "^1.1"
+  },
+  "suggest": {
+    "spatie/laravel-permission": "Recommended for assigning Sentinel permissions to moderator and administrator roles."
+  },
+  "require-dev": {
+    "larastan/larastan": "^3.0",
+    "laravel/pint": "^1.18",
+    "orchestra/testbench": "^10.0|^11.0",
+    "phpunit/phpunit": "^11.5|^12.0"
+  },
+  "autoload": {"psr-4": {"EloquentWorks\\Sentinel\\": "src/"}},
+  "autoload-dev": {"psr-4": {"EloquentWorks\\Sentinel\\Tests\\": "tests/"}},
+  "extra": {
+    "laravel": {
+      "providers": ["EloquentWorks\\Sentinel\\SentinelServiceProvider"],
+      "aliases": {"Sentinel": "EloquentWorks\\Sentinel\\Facades\\Sentinel"}
+    }
+  },
+  "scripts": {
+    "format": "pint",
+    "format:test": "pint --test",
+    "analyse": "phpstan analyse --memory-limit=1G",
+    "test": "phpunit",
+    "quality": ["@format:test", "@analyse", "@test"]
+  },
+  "config": {"sort-packages": true},
+  "minimum-stability": "stable",
+  "prefer-stable": true
 }
