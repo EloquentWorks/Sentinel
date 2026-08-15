@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace EloquentWorks\Sentinel\Models;
 
 use EloquentWorks\Sentinel\Enums\ActionStatus;
@@ -14,18 +12,83 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class ModerationAction extends Model
 {
     use UsesSentinelTable;
+
+    /**
+     * The name of the table associated with the model.
+     *
+     * @var string
+     */
     protected string $sentinelTableKey = 'actions';
+
+    /**
+     * The attributes that are guarded from mass assignment.
+     *
+     * @var array<int, string>
+     */
     protected $guarded = [];
-    protected $casts = [
-        'type' => ActionType::class,
-        'status' => ActionStatus::class,
-        'metadata' => 'array',
-        'expires_at' => 'immutable_datetime',
-        'applied_at' => 'immutable_datetime',
-        'revoked_at' => 'immutable_datetime',
-    ];
-    public function case(): BelongsTo { return $this->belongsTo(config('sentinel.models.case'), 'case_id'); }
-    public function actor(): MorphTo { return $this->morphTo(); }
-    public function target(): MorphTo { return $this->morphTo(); }
-    public function external(): MorphTo { return $this->morphTo(); }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        // Define the casts for the model attributes.
+        return [
+            'type' => ActionType::class,
+            'status' => ActionStatus::class,
+            'metadata' => 'array',
+            'expires_at' => 'immutable_datetime',
+            'applied_at' => 'immutable_datetime',
+            'revoked_at' => 'immutable_datetime',
+        ];
+    }
+
+    /**
+     * Get the moderation case associated with the action.
+     *
+     * @return BelongsTo
+     */
+    public function case(): BelongsTo
+    {
+        // Define the relationship to the moderation case model.
+        return $this->belongsTo(
+            config('sentinel.models.case'),
+            'case_id',
+        );
+    }
+
+    /**
+     * Get the moderator who initiated the action.
+     *
+     * @return MorphTo
+     */
+    public function actor(): MorphTo
+    {
+        // Define the polymorphic relationship to the actor (moderator) model.
+        return $this->morphTo();
+    }
+
+    /**
+     * Get the user or model targeted by the action.
+     *
+     * @return MorphTo
+     */
+    public function target(): MorphTo
+    {
+        // Define the polymorphic relationship to the target model.
+        return $this->morphTo();
+    }
+
+    /**
+     * Get the external Exile or Masquerade model created by the action.
+     *
+     * @return MorphTo
+     */
+    public function external(): MorphTo
+    {
+        // Define the polymorphic relationship to the external model (Exile or Masquerade).
+        return $this->morphTo();
+    }
 }

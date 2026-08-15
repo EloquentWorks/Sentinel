@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace EloquentWorks\Sentinel\Services;
 
+use DateTimeInterface;
 use EloquentWorks\Sentinel\Enums\ActionStatus;
 use EloquentWorks\Sentinel\Enums\ActionType;
 use EloquentWorks\Sentinel\Events\ModerationActionApplied;
@@ -14,105 +13,537 @@ use EloquentWorks\Sentinel\Models\ModerationCase;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Throwable;
 
 final class EnforcementManager
 {
+    /**
+     * Create a new class instance.
+     *
+     * @param  ExileGateway  $exile
+     * @param  MasqueradeGateway  $masquerade
+     * @param  AuditLogger  $audit
+     * @return void
+     */
     public function __construct(
         private readonly ExileGateway $exile,
         private readonly MasqueradeGateway $masquerade,
         private readonly AuditLogger $audit,
     ) {}
 
-    public function warn(Model $target, Authenticatable $actor, string $reason, string $severity = 'medium', ?ModerationCase $case = null): ModerationAction
-    {
-        return $this->apply(ActionType::Warn, $target, $actor, $reason, $case, fn () => $this->exile->warn($target, $reason, $severity, $actor), ['severity' => $severity]);
+    /**
+     * Issue a warning through Exile.
+     *
+     * @param  Model  $target
+     * @param  Authenticatable  $actor
+     * @param  string  $reason
+     * @param  string  $severity
+     * @param  ModerationCase|null  $case
+     * @return ModerationAction
+     */
+    public function warn(
+        Model $target,
+        Authenticatable $actor,
+        string $reason,
+        string $severity = 'medium',
+        ?ModerationCase $case = null,
+    ): ModerationAction {
+        // Issue a warning through Exile and record the action in Sentinel.
+        return $this->apply(
+            type: ActionType::Warn,
+            target: $target,
+            actor: $actor,
+            reason: $reason,
+            case: $case,
+            callback: fn () => $this->exile->warn(
+                $target,
+                $reason,
+                $severity,
+                $actor,
+            ),
+            metadata: ['severity' => $severity],
+        );
     }
 
-    public function strike(Model $target, Authenticatable $actor, string $reason, int $points = 1, string $category = 'other', ?ModerationCase $case = null): ModerationAction
-    {
-        return $this->apply(ActionType::Strike, $target, $actor, $reason, $case, fn () => $this->exile->strike($target, $reason, $points, $category, $actor), ['points' => $points, 'category' => $category]);
+    /**
+     * Issue strike points through Exile.
+     *
+     * @param  Model  $target
+     * @param  Authenticatable  $actor
+     * @param  string  $reason
+     * @param  int  $points
+     * @param  string  $category
+     * @param  ModerationCase|null  $case
+     * @return ModerationAction
+     */
+    public function strike(
+        Model $target,
+        Authenticatable $actor,
+        string $reason,
+        int $points = 1,
+        string $category = 'other',
+        ?ModerationCase $case = null,
+    ): ModerationAction {
+        // Issue a strike through Exile and record the action in Sentinel.
+        return $this->apply(
+            type: ActionType::Strike,
+            target: $target,
+            actor: $actor,
+            reason: $reason,
+            case: $case,
+            callback: fn () => $this->exile->strike(
+                $target,
+                $reason,
+                $points,
+                $category,
+                $actor,
+            ),
+            metadata: [
+                'points' => $points,
+                'category' => $category,
+            ],
+        );
     }
 
-    public function ban(Model $target, Authenticatable $actor, string $reason, mixed $expiresAt = null, string $category = 'other', ?ModerationCase $case = null, array $metadata = []): ModerationAction
-    {
-        return $this->apply(ActionType::Ban, $target, $actor, $reason, $case, fn () => $this->exile->ban($target, $reason, $expiresAt, $actor, $category, metadata: $metadata), ['category' => $category, 'expires_at' => $expiresAt?->toISOString() ?? null] + $metadata, $expiresAt);
+    /**
+     * Ban a user or other bannable model through Exile.
+     *
+     * @param  Model  $target
+     * @param  Authenticatable  $actor
+     * @param  string  $reason
+     * @param  mixed|null  $expiresAt
+     * @param  string  $category
+     * @param  ModerationCase|null  $case
+     * @param  array<string, mixed>  $metadata
+     * @return ModerationAction
+     */
+    public function ban(
+        Model $target,
+        Authenticatable $actor,
+        string $reason,
+        mixed $expiresAt = null,
+        string $category = 'other',
+        ?ModerationCase $case = null,
+        array $metadata = [],
+    ): ModerationAction {
+        // Prepare metadata for the ban action, including category and expiration date.
+        $actionMetadata = [
+            'category' => $category,
+            'expires_at' => $this->formatDate($expiresAt),
+            ...$metadata,
+        ];
+
+        // Apply the ban through Exile and record the action in Sentinel.
+        return $this->apply(
+            type: ActionType::Ban,
+            target: $target,
+            actor: $actor,
+            reason: $reason,
+            case: $case,
+            callback: fn () => $this->exile->ban(
+                target: $target,
+                reason: $reason,
+                expiresAt: $expiresAt,
+                moderator: $actor,
+                category: $category,
+                metadata: $metadata,
+            ),
+            metadata: $actionMetadata,
+            expiresAt: $expiresAt,
+        );
     }
 
-    public function restrict(Model $target, Authenticatable $actor, string $restriction, string $reason, mixed $expiresAt = null, ?ModerationCase $case = null): ModerationAction
-    {
+    /**
+     * Apply an account restriction through Exile.
+     *
+     * @param  Model  $target
+     * @param  Authenticatable  $actor
+     * @param  string  $restriction
+     * @param  string  $reason
+     * @param  mixed|null  $expiresAt
+     * @param  ModerationCase|null  $case
+     * @return ModerationAction
+     */
+    public function restrict(
+        Model $target,
+        Authenticatable $actor,
+        string $restriction,
+        string $reason,
+        mixed $expiresAt = null,
+        ?ModerationCase $case = null,
+    ): ModerationAction {
+        // Map the restriction string to the corresponding ActionType enum value.
         $type = match ($restriction) {
             'posting' => ActionType::RestrictPosting,
             'read_only' => ActionType::RestrictReadOnly,
             'login' => ActionType::RestrictLogin,
             'shadow' => ActionType::RestrictShadow,
-            default => throw new \InvalidArgumentException("Unknown restriction [{$restriction}]."),
+            default => throw new InvalidArgumentException(
+                "Unknown restriction [{$restriction}]."
+            ),
         };
-        return $this->apply($type, $target, $actor, $reason, $case, fn () => $this->exile->restrict($target, $restriction, $reason, $expiresAt, $actor), ['restriction' => $restriction], $expiresAt);
+
+        // Apply the restriction through Exile and record the action in Sentinel.
+        return $this->apply(
+            type: $type,
+            target: $target,
+            actor: $actor,
+            reason: $reason,
+            case: $case,
+            callback: fn () => $this->exile->restrict(
+                $target,
+                $restriction,
+                $reason,
+                $expiresAt,
+                $actor,
+            ),
+            metadata: ['restriction' => $restriction],
+            expiresAt: $expiresAt,
+        );
     }
 
-    public function banIp(string $ip, Authenticatable $actor, string $reason, mixed $expiresAt = null, ?ModerationCase $case = null): ModerationAction
-    {
-        return $this->applyExternal(ActionType::BanIp, $actor, $reason, $case, fn () => $this->exile->banIp($ip, $reason, $expiresAt, $actor), ['ip_address' => $ip], $expiresAt);
+    /**
+     * Ban an IP address through Exile.
+     *
+     * @param  string  $ip
+     * @param  Authenticatable  $actor
+     * @param  string  $reason
+     * @param  mixed|null  $expiresAt
+     * @param  ModerationCase|null  $case
+     * @return ModerationAction
+     */
+    public function banIp(
+        string $ip,
+        Authenticatable $actor,
+        string $reason,
+        mixed $expiresAt = null,
+        ?ModerationCase $case = null,
+    ): ModerationAction {
+        // Apply the IP ban through Exile and record the action in Sentinel.
+        return $this->applyExternal(
+            type: ActionType::BanIp,
+            actor: $actor,
+            reason: $reason,
+            case: $case,
+            callback: fn () => $this->exile->banIp(
+                $ip,
+                $reason,
+                $expiresAt,
+                $actor,
+            ),
+            metadata: ['ip_address' => $ip],
+            expiresAt: $expiresAt,
+        );
     }
 
-    public function banNetwork(string $cidr, Authenticatable $actor, string $reason, mixed $expiresAt = null, ?ModerationCase $case = null): ModerationAction
-    {
-        return $this->applyExternal(ActionType::BanNetwork, $actor, $reason, $case, fn () => $this->exile->banNetwork($cidr, $reason, $expiresAt, $actor), ['network' => $cidr], $expiresAt);
+    /**
+     * Ban a CIDR network range through Exile.
+     *
+     * @param  string  $cidr
+     * @param  Authenticatable  $actor
+     * @param  string  $reason
+     * @param  mixed|null  $expiresAt
+     * @param  ModerationCase|null  $case
+     * @return ModerationAction
+     */
+    public function banNetwork(
+        string $cidr,
+        Authenticatable $actor,
+        string $reason,
+        mixed $expiresAt = null,
+        ?ModerationCase $case = null,
+    ): ModerationAction {
+        // Apply the network ban through Exile and record the action in Sentinel.
+        return $this->applyExternal(
+            type: ActionType::BanNetwork,
+            actor: $actor,
+            reason: $reason,
+            case: $case,
+            callback: fn () => $this->exile->banNetwork(
+                $cidr,
+                $reason,
+                $expiresAt,
+                $actor,
+            ),
+            metadata: ['network' => $cidr],
+            expiresAt: $expiresAt,
+        );
     }
 
-    public function banDevice(string $fingerprint, Authenticatable $actor, string $reason, mixed $expiresAt = null, ?ModerationCase $case = null): ModerationAction
-    {
-        return $this->applyExternal(ActionType::BanDevice, $actor, $reason, $case, fn () => $this->exile->banDevice($fingerprint, $reason, $expiresAt, $actor), ['fingerprint_hash' => hash('sha256', $fingerprint)], $expiresAt);
+    /**
+     * Ban a device fingerprint through Exile.
+     *
+     * @param  string  $fingerprint
+     * @param  Authenticatable  $actor
+     * @param  string  $reason
+     * @param  mixed|null  $expiresAt
+     * @param  ModerationCase|null  $case
+     * @return ModerationAction
+     */
+    public function banDevice(
+        string $fingerprint,
+        Authenticatable $actor,
+        string $reason,
+        mixed $expiresAt = null,
+        ?ModerationCase $case = null,
+    ): ModerationAction {
+        // Apply the device ban through Exile and record the action in Sentinel.
+        return $this->applyExternal(
+            type: ActionType::BanDevice,
+            actor: $actor,
+            reason: $reason,
+            case: $case,
+            callback: fn () => $this->exile->banDevice(
+                $fingerprint,
+                $reason,
+                $expiresAt,
+                $actor,
+            ),
+            metadata: [
+                // Store only a hash in Sentinel's local audit metadata.
+                'fingerprint_hash' => hash('sha256', $fingerprint),
+            ],
+            expiresAt: $expiresAt,
+        );
     }
 
-    public function masquerade(Authenticatable $target, Authenticatable $actor, string $reason, ?ModerationCase $case = null, array $metadata = []): ModerationAction
-    {
-        $targetModel = $target instanceof Model ? $target : throw new \InvalidArgumentException('Masquerade target must be an Eloquent model.');
-        return $this->apply(ActionType::Masquerade, $targetModel, $actor, $reason, $case, fn () => $this->masquerade->start($target, $actor, $reason, ['sentinel_case_uuid' => $case?->uuid] + $metadata), $metadata);
+    /**
+     * Start a user impersonation session through Masquerade.
+     *
+     * @param  Authenticatable  $target
+     * @param  Authenticatable  $actor
+     * @param  string  $reason
+     * @param  ModerationCase|null  $case
+     * @param  array<string, mixed>  $metadata
+     * @return ModerationAction
+     */
+    public function masquerade(
+        Authenticatable $target,
+        Authenticatable $actor,
+        string $reason,
+        ?ModerationCase $case = null,
+        array $metadata = [],
+    ): ModerationAction {
+        // Ensure the target is an Eloquent model, as required by the Masquerade gateway.
+        $targetModel = $target instanceof Model
+            ? $target
+            : throw new InvalidArgumentException(
+                'Masquerade target must be an Eloquent model.'
+            );
+
+        // Prepare metadata for the masquerade action, including the associated case UUID if available.
+        $masqueradeMetadata = [
+            'sentinel_case_uuid' => $case?->uuid,
+            ...$metadata,
+        ];
+
+        // Apply the masquerade through Masquerade and record the action in Sentinel.
+        return $this->apply(
+            type: ActionType::Masquerade,
+            target: $targetModel,
+            actor: $actor,
+            reason: $reason,
+            case: $case,
+            callback: fn () => $this->masquerade->start(
+                $target,
+                $actor,
+                $reason,
+                $masqueradeMetadata,
+            ),
+            metadata: $masqueradeMetadata,
+        );
     }
 
-    private function apply(ActionType $type, Model $target, Authenticatable $actor, string $reason, ?ModerationCase $case, callable $callback, array $metadata = [], mixed $expiresAt = null): ModerationAction
-    {
-        return $this->recordAndExecute($type, $target, $actor, $reason, $case, $callback, $metadata, $expiresAt);
+    /**
+     * Execute an action associated with an Eloquent target.
+     *
+     * @param  ActionType  $type
+     * @param  Model  $target
+     * @param  Authenticatable  $actor
+     * @param  string  $reason
+     * @param  ModerationCase|null  $case
+     * @param  callable  $callback
+     * @param  array<string, mixed>  $metadata
+     * @param  mixed|null  $expiresAt
+     * @return ModerationAction
+     */
+    private function apply(
+        ActionType $type,
+        Model $target,
+        Authenticatable $actor,
+        string $reason,
+        ?ModerationCase $case,
+        callable $callback,
+        array $metadata = [],
+        mixed $expiresAt = null,
+    ): ModerationAction {
+        // Record the action and execute the provided callback, handling success and failure cases.
+        return $this->recordAndExecute(
+            $type,
+            $target,
+            $actor,
+            $reason,
+            $case,
+            $callback,
+            $metadata,
+            $expiresAt,
+        );
     }
 
-    private function applyExternal(ActionType $type, Authenticatable $actor, string $reason, ?ModerationCase $case, callable $callback, array $metadata = [], mixed $expiresAt = null): ModerationAction
-    {
-        return $this->recordAndExecute($type, null, $actor, $reason, $case, $callback, $metadata, $expiresAt);
+    /**
+     * Execute an action that does not have an Eloquent target, such as an IP ban.
+     *
+     * @param  ActionType  $type
+     * @param  Authenticatable  $actor
+     * @param  string  $reason
+     * @param  ModerationCase|null  $case
+     * @param  callable  $callback
+     * @param  array<string, mixed>  $metadata
+     * @param  mixed|null  $expiresAt
+     * @return ModerationAction
+     */
+    private function applyExternal(
+        ActionType $type,
+        Authenticatable $actor,
+        string $reason,
+        ?ModerationCase $case,
+        callable $callback,
+        array $metadata = [],
+        mixed $expiresAt = null,
+    ): ModerationAction {
+        // Record the action and execute the provided callback, handling success and failure
+        // cases for actions without a specific Eloquent target.
+        return $this->recordAndExecute(
+            $type,
+            null,
+            $actor,
+            $reason,
+            $case,
+            $callback,
+            $metadata,
+            $expiresAt,
+        );
     }
 
-    private function recordAndExecute(ActionType $type, ?Model $target, Authenticatable $actor, string $reason, ?ModerationCase $case, callable $callback, array $metadata, mixed $expiresAt): ModerationAction
-    {
-        $model = config('sentinel.models.action');
-        $actorModel = $actor instanceof Model ? $actor : throw new \InvalidArgumentException('Actor must be an Eloquent model.');
+    /**
+     * Create an action record, run the external action, and persist the result.
+     *
+     * @param  ActionType  $type
+     * @param  Model|null  $target
+     * @param  Authenticatable  $actor
+     * @param  string  $reason
+     * @param  ModerationCase|null  $case
+     * @param  callable  $callback
+     * @param  array<string, mixed>  $metadata
+     * @param  mixed|null  $expiresAt
+     * @return ModerationAction
+     */
+    private function recordAndExecute(
+        ActionType $type,
+        ?Model $target,
+        Authenticatable $actor,
+        string $reason,
+        ?ModerationCase $case,
+        callable $callback,
+        array $metadata,
+        mixed $expiresAt,
+    ): ModerationAction {
+        // Get the action model class from the configuration and ensure the actor is an Eloquent model.
+        $actionModel = config('sentinel.models.action');
+        $actorModel = $actor instanceof Model
+            ? $actor
+            : throw new InvalidArgumentException('Actor must be an Eloquent model.');
+
         /** @var ModerationAction $action */
-        $action = $model::query()->create([
+        $action = $actionModel::query()->create([
             'uuid' => (string) Str::uuid(),
             'case_id' => $case?->getKey(),
-            'actor_type' => $actorModel->getMorphClass(), 'actor_id' => $actorModel->getKey(),
-            'target_type' => $target?->getMorphClass(), 'target_id' => $target?->getKey(),
-            'type' => $type, 'status' => ActionStatus::Pending, 'reason' => $reason,
-            'source_package' => in_array($type, [ActionType::Masquerade], true) ? 'masquerade' : 'exile',
-            'expires_at' => $expiresAt, 'metadata' => $metadata ?: null,
+            'actor_type' => $actorModel->getMorphClass(),
+            'actor_id' => $actorModel->getKey(),
+            'target_type' => $target?->getMorphClass(),
+            'target_id' => $target?->getKey(),
+            'type' => $type,
+            'status' => ActionStatus::Pending,
+            'reason' => $reason,
+            'source_package' => $type === ActionType::Masquerade
+                ? 'masquerade'
+                : 'exile',
+            'expires_at' => $expiresAt,
+            'metadata' => $metadata ?: null,
         ]);
 
+        // Attempt to execute the external action and update the action record based on the outcome.
         try {
-            $external = $callback();
-            $externalModel = $external instanceof Model ? $external : null;
+            $externalResult = $callback();
+            $externalModel = $externalResult instanceof Model
+                ? $externalResult
+                : null;
+
+            // Update the action record to reflect that it was successfully applied, including
+            // any associated external model information.
             $action->forceFill([
                 'status' => ActionStatus::Applied,
                 'external_type' => $externalModel?->getMorphClass(),
                 'external_id' => $externalModel?->getKey(),
                 'applied_at' => now(),
             ])->save();
-            $this->audit->log('enforcement.'.$type->value, $actor, $target, $action, metadata: $metadata);
-            event(new ModerationActionApplied($action->fresh()));
-            return $action->fresh();
-        } catch (Throwable $e) {
-            $action->forceFill(['status' => ActionStatus::Failed, 'failure_reason' => $e->getMessage()])->save();
-            $this->audit->log('enforcement.failed', $actor, $target, $action, metadata: ['type' => $type->value, 'error' => $e->getMessage()]);
-            throw $e;
+
+            // Refresh the action instance to ensure we have the latest data, including
+            // any changes made during the save operation.
+            $freshAction = $action->fresh();
+
+            // Log the successful enforcement action and fire the ModerationActionApplied event.
+            $this->audit->log(
+                event: 'enforcement.'.$type->value,
+                actor: $actor,
+                subject: $target,
+                auditable: $freshAction,
+                metadata: $metadata,
+            );
+
+            // Fire the event to notify listeners that a moderation action has been applied.
+            event(new ModerationActionApplied($freshAction));
+
+            // Return the refreshed action instance to the caller.
+            return $freshAction;
+        } catch (Throwable $exception) {
+            $action->forceFill([
+                'status' => ActionStatus::Failed,
+                'failure_reason' => $exception->getMessage(),
+            ])->save();
+
+            // Log the failed enforcement action, including the error message in the metadata.
+            $this->audit->log(
+                event: 'enforcement.failed',
+                actor: $actor,
+                subject: $target,
+                auditable: $action,
+                metadata: [
+                    'type' => $type->value,
+                    'error' => $exception->getMessage(),
+                ],
+            );
+
+            // Rethrow the exception to allow higher-level error handling to take place.
+            throw $exception;
         }
+    }
+
+    /**
+     * Convert a date-like value to a stable string for JSON audit metadata.
+     *
+     * @param  mixed  $value
+     * @return string|null
+     */
+    private function formatDate(mixed $value): ?string
+    {
+        // If the value is a DateTimeInterface instance, format it as an ISO 8601 string.
+        if ($value instanceof DateTimeInterface) {
+            return $value->format(DateTimeInterface::ATOM);
+        }
+
+        // If the value is null, return null; otherwise, cast it to a string.
+        return $value === null ? null : (string) $value;
     }
 }

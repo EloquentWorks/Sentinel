@@ -1,21 +1,44 @@
 <?php
 
-declare(strict_types=1);
-
 namespace EloquentWorks\Sentinel\Services;
 
 final class DashboardService
 {
+    /**
+     * Return the current moderation workload metrics.
+     *
+     * @return array<string, int>
+     */
     public function metrics(): array
     {
-        $report = config('sentinel.models.report'); $case = config('sentinel.models.case'); $action = config('sentinel.models.action'); $watch = config('sentinel.models.watchlist');
+        // Get the models from the Sentinel configuration
+        $reportModel = config('sentinel.models.report');
+        $caseModel = config('sentinel.models.case');
+        $actionModel = config('sentinel.models.action');
+        $watchlistModel = config('sentinel.models.watchlist');
+
+        // Return the metrics as an associative array
         return [
-            'open_reports' => $report::query()->whereIn('status', ['new','triaged','in_review'])->count(),
-            'open_cases' => $case::query()->whereNotIn('status', ['resolved','closed'])->count(),
-            'overdue_cases' => $case::query()->whereNotIn('status', ['resolved','closed'])->where('due_at', '<', now())->count(),
-            'actions_24h' => $action::query()->where('created_at', '>=', now()->subDay())->count(),
-            'active_watchlist' => $watch::query()->where('active', true)->count(),
-            'critical_cases' => $case::query()->where('priority', 'critical')->whereNotIn('status', ['resolved','closed'])->count(),
+            'open_reports' => $reportModel::query()
+                ->whereIn('status', ['new', 'triaged', 'in_review'])
+                ->count(),
+            'open_cases' => $caseModel::query()
+                ->whereNotIn('status', ['resolved', 'closed'])
+                ->count(),
+            'overdue_cases' => $caseModel::query()
+                ->whereNotIn('status', ['resolved', 'closed'])
+                ->where('due_at', '<', now())
+                ->count(),
+            'actions_24h' => $actionModel::query()
+                ->where('created_at', '>=', now()->subDay())
+                ->count(),
+            'active_watchlist' => $watchlistModel::query()
+                ->where('active', true)
+                ->count(),
+            'critical_cases' => $caseModel::query()
+                ->where('priority', 'critical')
+                ->whereNotIn('status', ['resolved', 'closed'])
+                ->count(),
         ];
     }
 }

@@ -1,12 +1,20 @@
 <?php
 
-declare(strict_types=1);
-
 namespace EloquentWorks\Sentinel\Events;
 
 use EloquentWorks\Sentinel\Models\ContentHold;
 
 final readonly class ContentHeld
 {
-    public function __construct(public ContentHold $hold) {}
+    /**
+     * Create a new event instance.
+     *
+     * @param  ContentHold  $hold
+     * @return void
+     */
+    public function __construct(
+        public ContentHold $hold,
+    ) {
+        //
+    }
 }

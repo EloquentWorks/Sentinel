@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EloquentWorks\Sentinel;
 
 use EloquentWorks\Sentinel\Services\AutomationEngine;
@@ -13,22 +15,17 @@ use EloquentWorks\Sentinel\Services\ReportManager;
 use EloquentWorks\Sentinel\Services\RiskScorer;
 use EloquentWorks\Sentinel\Services\WatchlistManager;
 
+/**
+ * Main entry point for Sentinel's moderation services.
+ *
+ * The class intentionally exposes focused service objects instead of becoming
+ * a large god object. Consumers may resolve the services directly or access
+ * them through the Sentinel facade.
+ */
 final readonly class Sentinel
 {
     /**
      * Create a new class instance.
-     *
-     * @param  ReportManager  $reports
-     * @param  CaseManager  $cases
-     * @param  EnforcementManager  $enforcement
-     * @param  WatchlistManager  $watchlist
-     * @param  ContentHoldManager  $holds
-     * @param  AutomationEngine  $automation
-     * @param  MacroRunner  $macros
-     * @param  BulkModerationService  $bulk
-     * @param  RiskScorer  $risk
-     * @param  DashboardService  $dashboard
-     * @return void
      */
     public function __construct(
         public ReportManager $reports,
@@ -41,117 +38,65 @@ final readonly class Sentinel
         public BulkModerationService $bulk,
         public RiskScorer $risk,
         public DashboardService $dashboard,
-    ) {
-        //
-    }
+    ) {}
 
-    /**
-     * Return the report manager.
-     *
-     * @return ReportManager
-     */
+    /** Return the report manager. */
     public function reports(): ReportManager
     {
-        // Return the report manager instance.
         return $this->reports;
     }
 
-    /**
-     * Return the case manager.
-     *
-     * @return CaseManager
-     */
+    /** Return the case manager. */
     public function cases(): CaseManager
     {
-        // Return the case manager instance.
         return $this->cases;
     }
 
-    /**
-     * Return the enforcement manager.
-     *
-     * @return EnforcementManager
-     */
+    /** Return the enforcement manager. */
     public function enforcement(): EnforcementManager
     {
-        // Return the enforcement manager instance.
         return $this->enforcement;
     }
 
-    /**
-     * Return the watchlist manager.
-     *
-     * @return WatchlistManager
-     */
+    /** Return the watchlist manager. */
     public function watchlist(): WatchlistManager
     {
-        // Return the watchlist manager instance.
         return $this->watchlist;
     }
 
-    /**
-     * Return the content hold manager.
-     *
-     * @return ContentHoldManager
-     */
+    /** Return the content hold manager. */
     public function holds(): ContentHoldManager
     {
-        // Return the content hold manager instance.
         return $this->holds;
     }
 
-    /**
-     * Return the automation engine.
-     *
-     * @return AutomationEngine
-     */
+    /** Return the automation engine. */
     public function automation(): AutomationEngine
     {
-        // Return the automation engine instance.
         return $this->automation;
     }
 
-    /**
-     * Return the moderation macro runner.
-     *
-     * @return MacroRunner
-     */
+    /** Return the moderation macro runner. */
     public function macros(): MacroRunner
     {
-        // Return the moderation macro runner instance.
         return $this->macros;
     }
 
-    /**
-     * Return the bulk moderation service.
-     *
-     * @return BulkModerationService
-     */
+    /** Return the bulk moderation service. */
     public function bulk(): BulkModerationService
     {
-        // Return the bulk moderation service instance.
         return $this->bulk;
     }
 
-    /**
-     * Return the risk scorer.
-     *
-     * @return RiskScorer
-     */
+    /** Return the risk scorer. */
     public function risk(): RiskScorer
     {
-        // Return the risk scorer instance.
         return $this->risk;
     }
 
-    /**
-     * Return the dashboard metrics service.
-     *
-     * @return DashboardService
-     */
+    /** Return the dashboard metrics service. */
     public function dashboard(): DashboardService
     {
-        // Return the dashboard metrics service instance.
         return $this->dashboard;
     }
 }

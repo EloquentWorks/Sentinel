@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace EloquentWorks\Sentinel\Services;
 
 use EloquentWorks\Sentinel\Enums\Priority;
@@ -15,8 +13,32 @@ use Illuminate\Support\Str;
 
 final class ReportManager
 {
-    public function __construct(private readonly AuditLogger $audit) {}
+    /**
+     * Create a new class instance.
+     *
+     * @param  AuditLogger  $audit
+     * @return void
+     */
+    public function __construct(
+        private readonly AuditLogger $audit,
+    ) {
+        //
+    }
 
+    /**
+     * Create a new moderation report.
+     *
+     * @param  Model  $reportable
+     * @param  Authenticatable|null  $reporter
+     * @param  Model|null  $subject
+     * @param  string  $category
+     * @param  string|null  $reason
+     * @param  string|null  $description
+     * @param  Priority|string  $priority
+     * @param  string  $source
+     * @param  array<string, mixed>  $metadata
+     * @return ModerationReport
+     */
     public function create(
         Model $reportable,
         ?Authenticatable $reporter = null,
@@ -28,12 +50,13 @@ final class ReportManager
         string $source = 'user',
         array $metadata = [],
     ): ModerationReport {
-        $model = config('sentinel.models.report');
+        // Get the report model class from the configuration.
+        $reportModel = config('sentinel.models.report');
         $priority = is_string($priority) ? Priority::from($priority) : $priority;
         $reporterModel = $reporter instanceof Model ? $reporter : null;
 
         /** @var ModerationReport $report */
-        $report = $model::query()->create([
+        $report = $reportModel::query()->create([
             'uuid' => (string) Str::uuid(),
             'reporter_type' => $reporterModel?->getMorphClass(),
             'reporter_id' => $reporterModel?->getKey(),
@@ -52,37 +75,137 @@ final class ReportManager
             'metadata' => $metadata ?: null,
         ]);
 
-        $this->audit->log('report.created', $reporter, $subject, $report, metadata: ['category' => $category]);
+        // Log the report creation event and fire the ReportCreated event.
+        $this->audit->log(
+            event: 'report.created',
+            actor: $reporter,
+            subject: $subject,
+            auditable: $report,
+            metadata: ['category' => $category],
+        );
+        
+        // Fire the ReportCreated event to notify listeners of the new report.
         event(new ReportCreated($report));
 
+        // Return the created ModerationReport instance.
         return $report;
     }
 
-    public function triage(ModerationReport $report, Authenticatable $moderator, ?Priority $priority = null): ModerationReport
-    {
+    /**
+     * Mark a report as triaged and optionally change its priority.
+     *
+     * @param  ModerationReport  $report
+     * @param  Authenticatable  $moderator
+     * @param  Priority|null  $priority
+     * @return ModerationReport
+     */
+    public function triage(
+        ModerationReport $report,
+        Authenticatable $moderator,
+        ?Priority $priority = null,
+    ): ModerationReport {
+        // Get the current state of the report before making changes.
         $before = $report->toArray();
+
+        // Update the report's status to 'triaged', set the priority if provided, and record the triage timestamp.
         $report->forceFill([
             'status' => ReportStatus::Triaged,
             'priority' => $priority ?? $report->priority,
             'triaged_at' => now(),
         ])->save();
-        $this->audit->log('report.triaged', $moderator, $report->subject, $report, $before, $report->fresh()->toArray());
-        event(new ReportTriaged($report->fresh()));
-        return $report->fresh();
+
+        // Get the fresh state of the report after the changes.
+        $freshReport = $report->fresh();
+
+        $this->audit->log(
+            'report.triaged',
+            $moderator,
+            $report->subject,
+            $report,
+            $before,
+            $freshReport->toArray(),
+        );
+
+        // Fire the ReportTriaged event to notify listeners that the report has been triaged.
+        event(new ReportTriaged($freshReport));
+
+        // Return the updated ModerationReport instance.
+        return $freshReport;
     }
 
-    public function dismiss(ModerationReport $report, Authenticatable $moderator, ?string $reason = null): ModerationReport
-    {
+    /**
+     * Dismiss a report with an optional resolution reason.
+     *
+     * @param  ModerationReport  $report
+     * @param  Authenticatable  $moderator
+     * @param  string|null  $reason
+     * @return ModerationReport
+     */
+    public function dismiss(
+        ModerationReport $report,
+        Authenticatable $moderator,
+        ?string $reason = null,
+    ): ModerationReport {
+        // Get the current state of the report before making changes.
         $before = $report->toArray();
-        $report->forceFill(['status' => ReportStatus::Dismissed, 'resolved_at' => now(), 'resolution' => $reason])->save();
-        $this->audit->log('report.dismissed', $moderator, $report->subject, $report, $before, $report->fresh()->toArray());
-        return $report->fresh();
+
+        // Update the report's status to 'dismissed', set the resolution reason, and record the resolution timestamp.
+        $report->forceFill([
+            'status' => ReportStatus::Dismissed,
+            'resolved_at' => now(),
+            'resolution' => $reason,
+        ])->save();
+
+        // Get the fresh state of the report after the changes.
+        $freshReport = $report->fresh();
+
+        // Log the report dismissal event with the moderator, subject, and before/after states.
+        $this->audit->log(
+            'report.dismissed',
+            $moderator,
+            $report->subject,
+            $report,
+            $before,
+            $freshReport->toArray(),
+        );
+
+        // Return the updated ModerationReport instance.
+        return $freshReport;
     }
 
-    public function markDuplicate(ModerationReport $report, ModerationReport $original, Authenticatable $moderator): ModerationReport
-    {
-        $report->forceFill(['status' => ReportStatus::Duplicate, 'duplicate_of_id' => $original->getKey(), 'resolved_at' => now()])->save();
-        $this->audit->log('report.duplicate', $moderator, $report->subject, $report, metadata: ['original_report_id' => $original->getKey()]);
+    /**
+     * Mark a report as a duplicate of another report.
+     *
+     * @param  ModerationReport  $report
+     * @param  ModerationReport  $original
+     * @param  Authenticatable  $moderator
+     * @return ModerationReport
+     */
+    public function markDuplicate(
+        ModerationReport $report,
+        ModerationReport $original,
+        Authenticatable $moderator,
+    ): ModerationReport {
+        // Get the current state of the report before making changes.
+        $before = $report->toArray();
+
+        // Update the report's status to 'duplicate', set the original report ID, and record the resolution timestamp.
+        $report->forceFill([
+            'status' => ReportStatus::Duplicate,
+            'duplicate_of_id' => $original->getKey(),
+            'resolved_at' => now(),
+        ])->save();
+
+        // Get the fresh state of the report after the changes.
+        $this->audit->log(
+            event: 'report.duplicate',
+            actor: $moderator,
+            subject: $report->subject,
+            auditable: $report,
+            metadata: ['original_report_id' => $original->getKey()],
+        );
+
+        // Return the updated ModerationReport instance.
         return $report->fresh();
     }
 }

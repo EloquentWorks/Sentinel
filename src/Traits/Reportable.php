@@ -1,20 +1,36 @@
 <?php
 
-declare(strict_types=1);
-
 namespace EloquentWorks\Sentinel\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait Reportable
 {
+    /**
+     * Get Sentinel reports filed against this content model.
+     *
+     * @return MorphMany
+     */
     public function sentinelReportsAsContent(): MorphMany
     {
-        return $this->morphMany(config('sentinel.models.report'), 'reportable');
+        // Return a polymorphic relationship to the report model defined in the Sentinel configuration.
+        return $this->morphMany(
+            config('sentinel.models.report'),
+            'reportable',
+        );
     }
 
+    /**
+     * Get moderation holds placed on this content model.
+     *
+     * @return MorphMany
+     */
     public function sentinelContentHolds(): MorphMany
     {
-        return $this->morphMany(config('sentinel.models.hold'), 'reportable');
+        // Return a polymorphic relationship to the hold model defined in the Sentinel configuration.
+        return $this->morphMany(
+            config('sentinel.models.hold'),
+            'reportable',
+        );
     }
 }

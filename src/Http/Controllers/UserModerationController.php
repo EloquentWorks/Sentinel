@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace EloquentWorks\Sentinel\Http\Controllers;
 
 use EloquentWorks\Sentinel\Services\RiskScorer;
@@ -10,17 +8,48 @@ use Illuminate\View\View;
 
 final class UserModerationController extends Controller
 {
+    /**
+     * Display reports, cases, actions, watchlist entries, and a risk score.
+     *
+     * @param  string  $user
+     * @param  RiskScorer  $risk
+     * @return View
+     */
     public function show(string $user, RiskScorer $risk): View
     {
-        $userModel = config('sentinel.user_model'); $target = $userModel::query()->findOrFail($user);
-        $report = config('sentinel.models.report'); $case = config('sentinel.models.case'); $action = config('sentinel.models.action'); $watch = config('sentinel.models.watchlist');
+        // Get the user model from the configuration and find the target user by ID or fail if not found.
+        $userModel = config('sentinel.user_model');
+        $target = $userModel::query()->findOrFail($user);
+
+        // Get the configured models for reports, cases, actions, and watchlist entries.
+        $reportModel = config('sentinel.models.report');
+        $caseModel = config('sentinel.models.case');
+        $actionModel = config('sentinel.models.action');
+        $watchlistModel = config('sentinel.models.watchlist');
+
+        // Return a view with the target user, risk score, recent reports, cases, actions, and active watchlist entries.
         return view('sentinel::users.show', [
             'target' => $target,
             'riskScore' => $risk->score($target),
-            'reports' => $report::query()->whereMorphedTo('subject',$target)->latest()->limit(20)->get(),
-            'cases' => $case::query()->whereMorphedTo('subject',$target)->latest()->limit(20)->get(),
-            'actions' => $action::query()->whereMorphedTo('target',$target)->latest()->limit(30)->get(),
-            'watchlist' => $watch::query()->whereMorphedTo('subject',$target)->where('active',true)->get(),
+            'reports' => $reportModel::query()
+                ->whereMorphedTo('subject', $target)
+                ->latest()
+                ->limit(20)
+                ->get(),
+            'cases' => $caseModel::query()
+                ->whereMorphedTo('subject', $target)
+                ->latest()
+                ->limit(20)
+                ->get(),
+            'actions' => $actionModel::query()
+                ->whereMorphedTo('target', $target)
+                ->latest()
+                ->limit(30)
+                ->get(),
+            'watchlist' => $watchlistModel::query()
+                ->whereMorphedTo('subject', $target)
+                ->where('active', true)
+                ->get(),
         ]);
     }
 }

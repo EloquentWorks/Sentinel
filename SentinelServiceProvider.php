@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EloquentWorks\Sentinel;
 
 use EloquentWorks\Sentinel\Console\ExpireCommand;
@@ -26,22 +28,21 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Register and bootstrap the Sentinel moderation package.
+ */
 final class SentinelServiceProvider extends ServiceProvider
 {
     /**
      * Register package bindings and merge default configuration.
-     *
-     * @return void
      */
     public function register(): void
     {
-        // Merge the default Sentinel configuration with the application's configuration
         $this->mergeConfigFrom(
             __DIR__.'/../config/sentinel.php',
             'sentinel',
         );
 
-        // Bind the ModeratorAuthorizer interface to the implementation specified in the configuration
         $this->app->bind(
             ModeratorAuthorizer::class,
             fn ($app) => $app->make(
@@ -49,7 +50,6 @@ final class SentinelServiceProvider extends ServiceProvider
             ),
         );
 
-        // Bind the Sentinel class as a singleton, injecting its dependencies from the service container
         $this->app->singleton(
             Sentinel::class,
             fn ($app) => new Sentinel(
@@ -69,13 +69,9 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap views, routes, events, middleware, publishing, and commands.
-     *
-     * @param  Router  $router
-     * @return void
      */
     public function boot(Router $router): void
     {
-        // Register package views, middleware, routes, event listeners, publishing, and commands
         $this->registerViews();
         $this->registerMiddleware($router);
         $this->registerRoutes();
@@ -86,12 +82,9 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Register package Blade views.
-     *
-     * @return void
      */
     private function registerViews(): void
     {
-        // Load the package views from the resources/views directory and make them available under the 'sentinel' namespace
         $this->loadViewsFrom(
             __DIR__.'/../resources/views',
             'sentinel',
@@ -100,19 +93,14 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Register Sentinel route middleware aliases.
-     *
-     * @param  Router  $router
-     * @return void
      */
     private function registerMiddleware(Router $router): void
     {
-        // Register middleware aliases for Sentinel's permission checks and masquerading enforcement
         $router->aliasMiddleware(
             'sentinel.can',
             EnsureSentinelPermission::class,
         );
 
-        // Register middleware alias to block enforcement actions while masquerading
         $router->aliasMiddleware(
             'sentinel.not-masquerading',
             BlockEnforcementWhileMasquerading::class,
@@ -121,17 +109,13 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Register the optional built-in moderation routes.
-     *
-     * @return void
      */
     private function registerRoutes(): void
     {
-        // Check if the Sentinel routes are enabled in the configuration. If not, skip route registration.
         if (! config('sentinel.routes.enabled', true)) {
             return;
         }
 
-        // Register the Sentinel routes with the specified middleware, prefix, and route name prefix
         Route::middleware(config('sentinel.routes.middleware', ['web', 'auth']))
             ->prefix(config('sentinel.routes.prefix', 'sentinel'))
             ->as('sentinel.')
@@ -140,12 +124,9 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Register Sentinel and external package event listeners.
-     *
-     * @return void
      */
     private function registerEventListeners(): void
     {
-        // Listen for the ReportCreated event and handle it using the AutomationEngine
         Event::listen(ReportCreated::class, function (ReportCreated $event): void {
             app(AutomationEngine::class)->handle('report.created', [
                 'report' => $event->report,
@@ -155,7 +136,6 @@ final class SentinelServiceProvider extends ServiceProvider
             ]);
         });
 
-        // Listen for external moderation events and handle them using the ExternalModerationEventRecorder
         foreach ($this->externalModerationEvents() as $eventClass) {
             Event::listen(
                 $eventClass,
@@ -191,22 +171,17 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Register publishable package resources.
-     *
-     * @return void
      */
     private function registerPublishing(): void
     {
-        // Publish the Sentinel configuration file to the application's config directory
         $this->publishes([
             __DIR__.'/../config/sentinel.php' => config_path('sentinel.php'),
         ], 'sentinel-config');
 
-        // Publish the Sentinel database migrations to the application's migrations directory
         $this->publishes([
             __DIR__.'/../database/migrations' => database_path('migrations'),
         ], 'sentinel-migrations');
 
-        // Publish the Sentinel views to the application's resources/views/vendor directory for customization
         $this->publishes([
             __DIR__.'/../resources/views' => resource_path('views/vendor/sentinel'),
         ], 'sentinel-views');
@@ -214,17 +189,13 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Register Sentinel Artisan commands for console applications.
-     *
-     * @return void
      */
     private function registerCommands(): void
     {
-        // Only register commands if the application is running in the console
         if (! $this->app->runningInConsole()) {
             return;
         }
 
-        // Register the Sentinel Artisan commands for installation, permission setup, pruning, and expiration
         $this->commands([
             InstallCommand::class,
             InstallPermissionsCommand::class,

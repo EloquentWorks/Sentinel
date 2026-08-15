@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace EloquentWorks\Sentinel\Services;
 
 use EloquentWorks\Sentinel\Enums\CaseStatus;
@@ -16,11 +14,34 @@ use EloquentWorks\Sentinel\Models\ModerationReport;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 final class CaseManager
 {
-    public function __construct(private readonly AuditLogger $audit) {}
+    /**
+     * Create a new class instance.
+     *
+     * @param  AuditLogger  $audit
+     * @return void
+     */
+    public function __construct(
+        private readonly AuditLogger $audit,
+    ) {
+        //
+    }
 
+    /**
+     * Open a new moderation case.
+     *
+     * @param  Model|null  $subject
+     * @param  string  $title
+     * @param  Priority|string  $priority
+     * @param  Authenticatable|null  $openedBy
+     * @param  string|null  $queue
+     * @param  array<int, string>  $tags
+     * @param  array<string, mixed>  $metadata
+     * @return ModerationCase
+     */
     public function open(
         ?Model $subject,
         string $title,
@@ -30,11 +51,16 @@ final class CaseManager
         array $tags = [],
         array $metadata = [],
     ): ModerationCase {
-        $model = config('sentinel.models.case');
+        // Get the moderation case model class from the configuration.
+        $caseModel = config('sentinel.models.case');
         $priority = is_string($priority) ? Priority::from($priority) : $priority;
-        $sla = (int) config('sentinel.cases.sla_hours.'.$priority->value, 72);
+        $slaHours = (int) config(
+            'sentinel.cases.sla_hours.'.$priority->value,
+            72,
+        );
+
         /** @var ModerationCase $case */
-        $case = $model::query()->create([
+        $case = $caseModel::query()->create([
             'uuid' => (string) Str::uuid(),
             'subject_type' => $subject?->getMorphClass(),
             'subject_id' => $subject?->getKey(),
@@ -46,55 +72,148 @@ final class CaseManager
             'tags' => array_values(array_unique($tags)),
             'metadata' => $metadata ?: null,
             'opened_at' => now(),
-            'due_at' => $sla > 0 ? now()->addHours($sla) : null,
+            'due_at' => $slaHours > 0 ? now()->addHours($slaHours) : null,
         ]);
+
+        // Log the case opening event and fire the CaseOpened event.
         $this->audit->log('case.opened', $openedBy, $subject, $case);
         event(new CaseOpened($case));
+
+        // Return the newly created moderation case.
         return $case;
     }
 
-    public function fromReport(ModerationReport $report, ?Authenticatable $openedBy = null): ModerationCase
-    {
+    /**
+     * Open a moderation case from an existing report.
+     *
+     * @param  ModerationReport  $report
+     * @param  Authenticatable|null  $openedBy
+     * @return ModerationCase
+     */
+    public function fromReport(
+        ModerationReport $report,
+        ?Authenticatable $openedBy = null,
+    ): ModerationCase {
+        // Open a new moderation case using the details from the provided report.
         $case = $this->open(
-            $report->subject,
+            subject: $report->subject,
             title: $report->reason ?: 'Moderation report '.$report->uuid,
             priority: $report->priority,
             openedBy: $openedBy,
             tags: [$report->category],
             metadata: ['origin_report_uuid' => $report->uuid],
         );
+
+        // Attach the report to the newly created case without detaching any existing reports.
         $case->reports()->syncWithoutDetaching([$report->getKey()]);
+
+        // Log the report attachment event and fire the CaseOpened event.
         return $case;
     }
 
-    public function attachReport(ModerationCase $case, ModerationReport $report, ?Authenticatable $actor = null): void
-    {
+    /**
+     * Attach an additional report to a moderation case.
+     *
+     * @param  ModerationCase  $case
+     * @param  ModerationReport  $report
+     * @param  Authenticatable|null  $actor
+     * @return void
+     */
+    public function attachReport(
+        ModerationCase $case,
+        ModerationReport $report,
+        ?Authenticatable $actor = null,
+    ): void {
+        // Attach the report to the case without detaching any existing reports.
         $case->reports()->syncWithoutDetaching([$report->getKey()]);
-        $this->audit->log('case.report_attached', $actor, $case->subject, $case, metadata: ['report_id' => $report->getKey()]);
+
+        // Log the report attachment event in the audit log.
+        $this->audit->log(
+            event: 'case.report_attached',
+            actor: $actor,
+            subject: $case->subject,
+            auditable: $case,
+            metadata: ['report_id' => $report->getKey()],
+        );
     }
 
-    public function assign(ModerationCase $case, Authenticatable $moderator, ?Authenticatable $assignedBy = null): CaseAssignment
-    {
-        $case->assignments()->where('active', true)->update(['active' => false, 'released_at' => now()]);
-        $moderatorModel = $moderator instanceof Model ? $moderator : throw new \InvalidArgumentException('Moderator must be an Eloquent model.');
-        $by = $assignedBy instanceof Model ? $assignedBy : null;
+    /**
+     * Assign a moderator to a case, releasing the previous active assignment.
+     *
+     * @param  ModerationCase  $case
+     * @param  Authenticatable  $moderator
+     * @param  Authenticatable|null  $assignedBy
+     * @return CaseAssignment
+     */
+    public function assign(
+        ModerationCase $case,
+        Authenticatable $moderator,
+        ?Authenticatable $assignedBy = null,
+    ): CaseAssignment {
+        // Release any existing active assignments for the case before creating a new assignment.
+        $case->assignments()
+            ->where('active', true)
+            ->update([
+                'active' => false,
+                'released_at' => now(),
+            ]);
+
+        // Ensure the moderator is an Eloquent model; throw an exception if not.
+        $moderatorModel = $moderator instanceof Model
+            ? $moderator
+            : throw new InvalidArgumentException('Moderator must be an Eloquent model.');
+
+        // If assignedBy is provided, ensure it is an Eloquent model; otherwise, set it to null.
+        $assignedByModel = $assignedBy instanceof Model ? $assignedBy : null;
+
         /** @var CaseAssignment $assignment */
         $assignment = $case->assignments()->create([
             'moderator_type' => $moderatorModel->getMorphClass(),
             'moderator_id' => $moderatorModel->getKey(),
-            'assigned_by_type' => $by?->getMorphClass(),
-            'assigned_by_id' => $by?->getKey(),
+            'assigned_by_type' => $assignedByModel?->getMorphClass(),
+            'assigned_by_id' => $assignedByModel?->getKey(),
             'active' => true,
             'assigned_at' => now(),
         ]);
-        $this->audit->log('case.assigned', $assignedBy, $case->subject, $case, metadata: ['moderator_id' => $moderatorModel->getKey()]);
+
+        // Log the case assignment event in the audit log and fire the CaseAssigned event.
+        $this->audit->log(
+            event: 'case.assigned',
+            actor: $assignedBy,
+            subject: $case->subject,
+            auditable: $case,
+            metadata: ['moderator_id' => $moderatorModel->getKey()],
+        );
+
+        // Fire the CaseAssigned event to notify listeners of the new assignment.
         event(new CaseAssigned($assignment));
+
+        // Return the newly created case assignment.
         return $assignment;
     }
 
-    public function note(ModerationCase $case, Authenticatable $author, string $body, string $visibility = 'internal', array $metadata = []): CaseNote
-    {
-        $authorModel = $author instanceof Model ? $author : throw new \InvalidArgumentException('Author must be an Eloquent model.');
+    /**
+     * Add a note to a moderation case.
+     *
+     * @param  ModerationCase  $case
+     * @param  Authenticatable  $author
+     * @param  string  $body
+     * @param  string  $visibility
+     * @param  array<string, mixed>  $metadata
+     * @return CaseNote
+     */
+    public function note(
+        ModerationCase $case,
+        Authenticatable $author,
+        string $body,
+        string $visibility = 'internal',
+        array $metadata = [],
+    ): CaseNote {
+        // Ensure the author is an Eloquent model; throw an exception if not.
+        $authorModel = $author instanceof Model
+            ? $author
+            : throw new InvalidArgumentException('Author must be an Eloquent model.');
+
         /** @var CaseNote $note */
         $note = $case->notes()->create([
             'author_type' => $authorModel->getMorphClass(),
@@ -103,24 +222,103 @@ final class CaseManager
             'visibility' => $visibility,
             'metadata' => $metadata ?: null,
         ]);
-        $this->audit->log('case.note_added', $author, $case->subject, $case, metadata: ['note_id' => $note->getKey()]);
+
+        // Log the case note addition event in the audit log.
+        $this->audit->log(
+            event: 'case.note_added',
+            actor: $author,
+            subject: $case->subject,
+            auditable: $case,
+            metadata: ['note_id' => $note->getKey()],
+        );
+
+        // Return the currently created case note.
         return $note;
     }
 
-    public function resolve(ModerationCase $case, Authenticatable $actor, string $resolution): ModerationCase
-    {
+    /**
+     * Resolve a moderation case and release its active assignment.
+     *
+     * @param  ModerationCase  $case
+     * @param  Authenticatable  $actor
+     * @param  string  $resolution
+     * @return ModerationCase
+     */
+    public function resolve(
+        ModerationCase $case,
+        Authenticatable $actor,
+        string $resolution,
+    ): ModerationCase {
+        // Store the current state of the case before making changes for auditing purposes.
         $before = $case->toArray();
-        $case->forceFill(['status' => CaseStatus::Resolved, 'resolution' => $resolution, 'resolved_at' => now()])->save();
-        $case->assignments()->where('active', true)->update(['active' => false, 'released_at' => now()]);
-        $this->audit->log('case.resolved', $actor, $case->subject, $case, $before, $case->fresh()->toArray());
-        event(new CaseResolved($case->fresh()));
-        return $case->fresh();
+
+        // Update the case status to resolved, set the resolution, and record the resolved timestamp.
+        $case->forceFill([
+            'status' => CaseStatus::Resolved,
+            'resolution' => $resolution,
+            'resolved_at' => now(),
+        ])->save();
+
+        // Release any existing active assignments for the case upon resolution.
+        $case->assignments()
+            ->where('active', true)
+            ->update([
+                'active' => false,
+                'released_at' => now(),
+            ]);
+
+        // Refresh the case instance to get the latest state after updates.
+        $freshCase = $case->fresh();
+
+        // Log the case resolution event in the audit log.
+        $this->audit->log(
+            'case.resolved',
+            $actor,
+            $case->subject,
+            $case,
+            $before,
+            $freshCase->toArray(),
+        );
+
+        // Fire the CaseResolved event to notify listeners of the case resolution.
+        event(new CaseResolved($freshCase));
+
+        // Return the refreshed case instance after resolution.
+        return $freshCase;
     }
 
-    public function escalate(ModerationCase $case, Authenticatable $actor, Priority $priority = Priority::Urgent, ?string $queue = null): ModerationCase
-    {
-        $case->forceFill(['status' => CaseStatus::Escalated, 'priority' => $priority, 'queue' => $queue ?? $case->queue])->save();
-        $this->audit->log('case.escalated', $actor, $case->subject, $case, metadata: ['priority' => $priority->value]);
+    /**
+     * Escalate a case to a higher priority or moderation queue.
+     *
+     * @param  ModerationCase  $case
+     * @param  Authenticatable  $actor
+     * @param  Priority  $priority
+     * @param  string|null  $queue
+     * @return ModerationCase
+     */
+    public function escalate(
+        ModerationCase $case,
+        Authenticatable $actor,
+        Priority $priority = Priority::Urgent,
+        ?string $queue = null,
+    ): ModerationCase {
+        // Store the current state of the case before making changes for auditing purposes.
+        $case->forceFill([
+            'status' => CaseStatus::Escalated,
+            'priority' => $priority,
+            'queue' => $queue ?? $case->queue,
+        ])->save();
+
+        // Log the case escalation event in the audit log with relevant metadata.
+        $this->audit->log(
+            event: 'case.escalated',
+            actor: $actor,
+            subject: $case->subject,
+            auditable: $case,
+            metadata: ['priority' => $priority->value],
+        );
+
+        // Return the refreshed case instance after escalation.
         return $case->fresh();
     }
 }

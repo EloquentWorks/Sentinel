@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace EloquentWorks\Sentinel\Models;
 
 use EloquentWorks\Sentinel\Enums\CaseStatus;
@@ -16,28 +14,102 @@ class ModerationCase extends Model
 {
     use UsesSentinelTable;
 
+    /**
+     * The name of the "sentinel" table associated with the model.
+     *
+     * @var string
+     */
     protected string $sentinelTableKey = 'cases';
-    protected $guarded = [];
-    protected $casts = [
-        'status' => CaseStatus::class,
-        'priority' => Priority::class,
-        'tags' => 'array',
-        'metadata' => 'array',
-        'opened_at' => 'immutable_datetime',
-        'due_at' => 'immutable_datetime',
-        'resolved_at' => 'immutable_datetime',
-    ];
 
-    public function subject(): MorphTo { return $this->morphTo(); }
+    /**
+     * The attributes that are not mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $guarded = [];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        // Define the attributes that should be cast to specific types.
+        return [
+            'status' => CaseStatus::class,
+            'priority' => Priority::class,
+            'tags' => 'array',
+            'metadata' => 'array',
+            'opened_at' => 'immutable_datetime',
+            'due_at' => 'immutable_datetime',
+            'resolved_at' => 'immutable_datetime',
+        ];
+    }
+
+    /**
+     * Get the user or model being investigated.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     */
+    public function subject(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * Get reports attached to this case.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function reports(): BelongsToMany
     {
+        // Get the reports associated with this case using the configured report model and pivot table.
         return $this->belongsToMany(
             config('sentinel.models.report'),
             config('sentinel.tables.case_reports'),
-            'case_id', 'report_id'
+            'case_id',
+            'report_id',
         )->withTimestamps();
     }
-    public function notes(): HasMany { return $this->hasMany(config('sentinel.models.note'), 'case_id'); }
-    public function assignments(): HasMany { return $this->hasMany(config('sentinel.models.assignment'), 'case_id'); }
-    public function actions(): HasMany { return $this->hasMany(config('sentinel.models.action'), 'case_id'); }
+
+    /**
+     * Get notes attached to this case.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function notes(): HasMany
+    {
+        // Get the notes associated with this case using the configured note model and foreign key.
+        return $this->hasMany(
+            config('sentinel.models.note'),
+            'case_id',
+        );
+    }
+
+    /**
+     * Get moderator assignments for this case.
+     */
+    public function assignments(): HasMany
+    {
+        // Get the assignments associated with this case using the configured assignment model and foreign key.
+        return $this->hasMany(
+            config('sentinel.models.assignment'),
+            'case_id',
+        );
+    }
+
+    /**
+     * Get enforcement actions associated with this case.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function actions(): HasMany
+    {
+        // Get the actions associated with this case using the configured action model and foreign key.
+        return $this->hasMany(
+            config('sentinel.models.action'),
+            'case_id',
+        );
+    }
 }

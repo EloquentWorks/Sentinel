@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace EloquentWorks\Sentinel\Authorization;
 
 use EloquentWorks\Sentinel\Contracts\ModeratorAuthorizer;
@@ -10,8 +8,23 @@ use Illuminate\Support\Facades\Gate;
 
 final class GateAuthorizer implements ModeratorAuthorizer
 {
-    public function allows(Authenticatable $user, string $ability, mixed $subject = null): bool
-    {
-        return Gate::forUser($user)->allows($ability, $subject === null ? [] : [$subject]);
+    /**
+     * Determine whether the given user may perform a moderation ability.
+     *
+     * @param  Authenticatable  $user
+     * @param  string  $ability
+     * @param  mixed|null  $subject
+     * @return bool
+     */
+    public function allows(
+        Authenticatable $user,
+        string $ability,
+        mixed $subject = null,
+    ): bool {
+        // If the subject is null, we pass an empty array to the Gate::forUser method to avoid passing null as a parameter.
+        return Gate::forUser($user)->allows(
+            $ability,
+            $subject === null ? [] : [$subject],
+        );
     }
 }

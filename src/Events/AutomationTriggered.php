@@ -1,12 +1,20 @@
 <?php
 
-declare(strict_types=1);
-
 namespace EloquentWorks\Sentinel\Events;
 
 use EloquentWorks\Sentinel\Models\AutomationRule;
 
 final readonly class AutomationTriggered
 {
-    public function __construct(public AutomationRule $rule) {}
+    /**
+     * Create a new event instance.
+     *
+     * @param  AutomationRule  $rule
+     * @return void
+     */
+    public function __construct(
+        public AutomationRule $rule,
+    ) {
+        //
+    }
 }
