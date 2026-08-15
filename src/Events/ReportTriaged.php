@@ -9,7 +9,6 @@ final readonly class ReportTriaged
     /**
      * Create a new event instance.
      *
-     * @param  ModerationReport  $report
      * @return void
      */
     public function __construct(

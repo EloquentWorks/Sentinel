@@ -9,7 +9,6 @@ final readonly class ModerationActionApplied
     /**
      * Create a new event instance.
      *
-     * @param  ModerationAction  $action
      * @return void
      */
     public function __construct(

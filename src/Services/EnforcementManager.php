@@ -21,9 +21,6 @@ final class EnforcementManager
     /**
      * Create a new class instance.
      *
-     * @param  ExileGateway  $exile
-     * @param  MasqueradeGateway  $masquerade
-     * @param  AuditLogger  $audit
      * @return void
      */
     public function __construct(
@@ -34,13 +31,6 @@ final class EnforcementManager
 
     /**
      * Issue a warning through Exile.
-     *
-     * @param  Model  $target
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  string  $severity
-     * @param  ModerationCase|null  $case
-     * @return ModerationAction
      */
     public function warn(
         Model $target,
@@ -68,14 +58,6 @@ final class EnforcementManager
 
     /**
      * Issue strike points through Exile.
-     *
-     * @param  Model  $target
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  int  $points
-     * @param  string  $category
-     * @param  ModerationCase|null  $case
-     * @return ModerationAction
      */
     public function strike(
         Model $target,
@@ -109,14 +91,7 @@ final class EnforcementManager
     /**
      * Ban a user or other bannable model through Exile.
      *
-     * @param  Model  $target
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  mixed|null  $expiresAt
-     * @param  string  $category
-     * @param  ModerationCase|null  $case
      * @param  array<string, mixed>  $metadata
-     * @return ModerationAction
      */
     public function ban(
         Model $target,
@@ -156,14 +131,6 @@ final class EnforcementManager
 
     /**
      * Apply an account restriction through Exile.
-     *
-     * @param  Model  $target
-     * @param  Authenticatable  $actor
-     * @param  string  $restriction
-     * @param  string  $reason
-     * @param  mixed|null  $expiresAt
-     * @param  ModerationCase|null  $case
-     * @return ModerationAction
      */
     public function restrict(
         Model $target,
@@ -205,13 +172,6 @@ final class EnforcementManager
 
     /**
      * Ban an IP address through Exile.
-     *
-     * @param  string  $ip
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  mixed|null  $expiresAt
-     * @param  ModerationCase|null  $case
-     * @return ModerationAction
      */
     public function banIp(
         string $ip,
@@ -239,13 +199,6 @@ final class EnforcementManager
 
     /**
      * Ban a CIDR network range through Exile.
-     *
-     * @param  string  $cidr
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  mixed|null  $expiresAt
-     * @param  ModerationCase|null  $case
-     * @return ModerationAction
      */
     public function banNetwork(
         string $cidr,
@@ -273,13 +226,6 @@ final class EnforcementManager
 
     /**
      * Ban a device fingerprint through Exile.
-     *
-     * @param  string  $fingerprint
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  mixed|null  $expiresAt
-     * @param  ModerationCase|null  $case
-     * @return ModerationAction
      */
     public function banDevice(
         string $fingerprint,
@@ -311,12 +257,7 @@ final class EnforcementManager
     /**
      * Start a user impersonation session through Masquerade.
      *
-     * @param  Authenticatable  $target
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  ModerationCase|null  $case
      * @param  array<string, mixed>  $metadata
-     * @return ModerationAction
      */
     public function masquerade(
         Authenticatable $target,
@@ -358,15 +299,7 @@ final class EnforcementManager
     /**
      * Execute an action associated with an Eloquent target.
      *
-     * @param  ActionType  $type
-     * @param  Model  $target
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  ModerationCase|null  $case
-     * @param  callable  $callback
      * @param  array<string, mixed>  $metadata
-     * @param  mixed|null  $expiresAt
-     * @return ModerationAction
      */
     private function apply(
         ActionType $type,
@@ -394,14 +327,7 @@ final class EnforcementManager
     /**
      * Execute an action that does not have an Eloquent target, such as an IP ban.
      *
-     * @param  ActionType  $type
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  ModerationCase|null  $case
-     * @param  callable  $callback
      * @param  array<string, mixed>  $metadata
-     * @param  mixed|null  $expiresAt
-     * @return ModerationAction
      */
     private function applyExternal(
         ActionType $type,
@@ -429,15 +355,8 @@ final class EnforcementManager
     /**
      * Create an action record, run the external action, and persist the result.
      *
-     * @param  ActionType  $type
-     * @param  Model|null  $target
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  ModerationCase|null  $case
-     * @param  callable  $callback
      * @param  array<string, mixed>  $metadata
      * @param  mixed|null  $expiresAt
-     * @return ModerationAction
      */
     private function recordAndExecute(
         ActionType $type,
@@ -532,9 +451,6 @@ final class EnforcementManager
 
     /**
      * Convert a date-like value to a stable string for JSON audit metadata.
-     *
-     * @param  mixed  $value
-     * @return string|null
      */
     private function formatDate(mixed $value): ?string
     {

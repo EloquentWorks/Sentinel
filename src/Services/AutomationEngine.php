@@ -13,10 +13,6 @@ final class AutomationEngine
     /**
      * Create a new class instance.
      *
-     * @param  CaseManager  $cases
-     * @param  WatchlistManager  $watchlist
-     * @param  EnforcementManager  $enforcement
-     * @param  AuditLogger  $audit
      * @return void
      */
     public function __construct(
@@ -31,7 +27,6 @@ final class AutomationEngine
     /**
      * Process all enabled rules matching the supplied event name.
      *
-     * @param  string  $event
      * @param  array<string, mixed>  $context
      * @return array<int, AutomationRule>
      */
@@ -100,7 +95,6 @@ final class AutomationEngine
      *
      * @param  array<int, array<string, mixed>>  $conditions
      * @param  array<string, mixed>  $context
-     * @return bool
      */
     private function matches(array $conditions, array $context): bool
     {
@@ -143,9 +137,7 @@ final class AutomationEngine
     /**
      * Execute the actions configured on a matching automation rule.
      *
-     * @param  AutomationRule  $rule
      * @param  array<string, mixed>  $context
-     * @return void
      */
     private function execute(AutomationRule $rule, array $context): void
     {

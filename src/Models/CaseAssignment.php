@@ -13,8 +13,6 @@ class CaseAssignment extends Model
 
     /**
      * The name of the "sentinel" table key for this model.
-     *
-     * @var string
      */
     protected string $sentinelTableKey = 'assignments';
 
@@ -42,8 +40,6 @@ class CaseAssignment extends Model
 
     /**
      * Get the moderation case for this assignment.
-     *
-     * @return BelongsTo
      */
     public function case(): BelongsTo
     {
@@ -56,8 +52,6 @@ class CaseAssignment extends Model
 
     /**
      * Get the assigned moderator.
-     *
-     * @return MorphTo
      */
     public function moderator(): MorphTo
     {
@@ -67,8 +61,6 @@ class CaseAssignment extends Model
 
     /**
      * Get the staff member who created the assignment.
-     *
-     * @return MorphTo
      */
     public function assignedBy(): MorphTo
     {

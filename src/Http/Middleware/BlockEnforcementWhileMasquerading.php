@@ -12,7 +12,6 @@ final class BlockEnforcementWhileMasquerading
     /**
      * Create a new class instance.
      *
-     * @param  MasqueradeGateway  $masquerade
      * @return void
      */
     public function __construct(
@@ -23,10 +22,6 @@ final class BlockEnforcementWhileMasquerading
 
     /**
      * Handle an incoming request.
-     *
-     * @param  Request  $request
-     * @param  Closure  $next
-     * @return Response
      */
     public function handle(Request $request, Closure $next): Response
     {

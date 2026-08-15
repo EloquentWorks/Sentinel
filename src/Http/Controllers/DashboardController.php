@@ -10,9 +10,6 @@ final class DashboardController extends Controller
 {
     /**
      * Display dashboard metrics and the most recently updated records.
-     *
-     * @param  DashboardService  $dashboard
-     * @return View
      */
     public function __invoke(DashboardService $dashboard): View
     {

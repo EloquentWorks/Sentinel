@@ -11,7 +11,6 @@ final class BulkModerationService
     /**
      * Create a new class instance.
      *
-     * @param  EnforcementManager  $enforcement
      * @return void
      */
     public function __construct(
@@ -24,9 +23,6 @@ final class BulkModerationService
      * Warn each supplied target.
      *
      * @param  iterable<Model>  $targets
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  string  $severity
      * @return array{succeeded: array<int, mixed>, failed: array<int, array<string, mixed>>}
      */
     public function warn(
@@ -50,10 +46,6 @@ final class BulkModerationService
      * Strike each supplied target.
      *
      * @param  iterable<Model>  $targets
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  int  $points
-     * @param  string  $category
      * @return array{succeeded: array<int, mixed>, failed: array<int, array<string, mixed>>}
      */
     public function strike(
@@ -80,10 +72,6 @@ final class BulkModerationService
      * Ban each supplied target.
      *
      * @param  iterable<Model>  $targets
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  mixed|null  $expiresAt
-     * @param  string  $category
      * @return array{succeeded: array<int, mixed>, failed: array<int, array<string, mixed>>}
      */
     public function ban(

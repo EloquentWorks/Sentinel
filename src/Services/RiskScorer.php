@@ -9,9 +9,6 @@ final class RiskScorer
 {
     /**
      * Calculate the current risk score for the subject.
-     *
-     * @param  Model  $subject
-     * @return int
      */
     public function score(Model $subject): int
     {

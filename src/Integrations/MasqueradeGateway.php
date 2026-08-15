@@ -10,11 +10,11 @@ final class MasqueradeGateway
     /**
      * Start a masquerade session for a moderator.
      *
-     * @param  Authenticatable  $target The user to be impersonated.
-     * @param  Authenticatable  $impersonator The moderator initiating the impersonation.
-     * @param  string  $reason The reason for the impersonation.
-     * @param  array  $metadata Additional metadata for the impersonation session.
-     * @param  string  $guard The authentication guard to use for the impersonation session.
+     * @param  Authenticatable  $target  The user to be impersonated.
+     * @param  Authenticatable  $impersonator  The moderator initiating the impersonation.
+     * @param  string  $reason  The reason for the impersonation.
+     * @param  array  $metadata  Additional metadata for the impersonation session.
+     * @param  string  $guard  The authentication guard to use for the impersonation session.
      * @return mixed The result of starting the masquerade session.
      */
     public function start(

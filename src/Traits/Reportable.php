@@ -8,8 +8,6 @@ trait Reportable
 {
     /**
      * Get Sentinel reports filed against this content model.
-     *
-     * @return MorphMany
      */
     public function sentinelReportsAsContent(): MorphMany
     {
@@ -22,8 +20,6 @@ trait Reportable
 
     /**
      * Get moderation holds placed on this content model.
-     *
-     * @return MorphMany
      */
     public function sentinelContentHolds(): MorphMany
     {

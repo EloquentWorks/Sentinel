@@ -16,8 +16,6 @@ class ModerationCase extends Model
 
     /**
      * The name of the "sentinel" table associated with the model.
-     *
-     * @var string
      */
     protected string $sentinelTableKey = 'cases';
 
@@ -49,8 +47,6 @@ class ModerationCase extends Model
 
     /**
      * Get the user or model being investigated.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
     public function subject(): MorphTo
     {
@@ -59,8 +55,6 @@ class ModerationCase extends Model
 
     /**
      * Get reports attached to this case.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function reports(): BelongsToMany
     {
@@ -75,8 +69,6 @@ class ModerationCase extends Model
 
     /**
      * Get notes attached to this case.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function notes(): HasMany
     {
@@ -101,8 +93,6 @@ class ModerationCase extends Model
 
     /**
      * Get enforcement actions associated with this case.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function actions(): HasMany
     {

@@ -11,8 +11,6 @@ class AutomationRule extends Model
 
     /**
      * The name of the "sentinel" table key for this model.
-     *
-     * @var string
      */
     protected string $sentinelTableKey = 'rules';
 

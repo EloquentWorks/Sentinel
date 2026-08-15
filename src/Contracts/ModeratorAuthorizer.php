@@ -8,11 +8,6 @@ interface ModeratorAuthorizer
 {
     /**
      * Determine whether the user may perform the requested ability.
-     *
-     * @param  Authenticatable  $user
-     * @param  string  $ability
-     * @param  mixed|null  $subject
-     * @return bool
      */
     public function allows(
         Authenticatable $user,

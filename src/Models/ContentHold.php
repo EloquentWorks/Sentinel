@@ -12,8 +12,6 @@ class ContentHold extends Model
 
     /**
      * The table associated with the model.
-     *
-     * @var string
      */
     protected string $sentinelTableKey = 'holds';
 
@@ -43,8 +41,6 @@ class ContentHold extends Model
 
     /**
      * Get the content currently or previously held.
-     *
-     * @return MorphTo
      */
     public function reportable(): MorphTo
     {
@@ -59,8 +55,6 @@ class ContentHold extends Model
 
     /**
      * Get the moderator who placed the hold.
-     *
-     * @return MorphTo
      */
     public function actor(): MorphTo
     {

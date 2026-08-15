@@ -12,11 +12,6 @@ final class AssignmentController extends Controller
 {
     /**
      * Assign a moderator to the given moderation case.
-     *
-     * @param  Request  $request
-     * @param  ModerationCase  $case
-     * @param  CaseManager  $cases
-     * @return RedirectResponse
      */
     public function store(
         Request $request,

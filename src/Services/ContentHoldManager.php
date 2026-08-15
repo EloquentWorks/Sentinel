@@ -13,7 +13,6 @@ final class ContentHoldManager
     /**
      * Create a new class instance.
      *
-     * @param  AuditLogger  $audit
      * @return void
      */
     public function __construct(
@@ -25,12 +24,7 @@ final class ContentHoldManager
     /**
      * Place a moderation hold on content.
      *
-     * @param  Model  $reportable
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  mixed  $expiresAt
      * @param  array<string, mixed>  $metadata
-     * @return ContentHold
      */
     public function hold(
         Model $reportable,
@@ -67,10 +61,6 @@ final class ContentHoldManager
 
     /**
      * Release an active content hold.
-     *
-     * @param  ContentHold  $hold
-     * @param  Authenticatable  $actor
-     * @return void
      */
     public function release(ContentHold $hold, Authenticatable $actor): void
     {

@@ -12,8 +12,6 @@ class ModerationMacro extends Model
 
     /**
      * The name of the "sentinel" table associated with the model.
-     *
-     * @var string
      */
     protected string $sentinelTableKey = 'macros';
 
@@ -41,8 +39,6 @@ class ModerationMacro extends Model
 
     /**
      * Get the staff member who created the macro.
-     *
-     * @return MorphTo
      */
     public function createdBy(): MorphTo
     {

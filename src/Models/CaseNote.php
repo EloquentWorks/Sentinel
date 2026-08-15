@@ -13,8 +13,6 @@ class CaseNote extends Model
 
     /**
      * The name of the "sentinel" table associated with the model.
-     *
-     * @var string
      */
     protected string $sentinelTableKey = 'notes';
 
@@ -40,8 +38,6 @@ class CaseNote extends Model
 
     /**
      * Get the moderation case that owns the note.
-     *
-     * @return BelongsTo
      */
     public function case(): BelongsTo
     {
@@ -54,8 +50,6 @@ class CaseNote extends Model
 
     /**
      * Get the staff member who authored the note.
-     *
-     * @return MorphTo
      */
     public function author(): MorphTo
     {

@@ -15,9 +15,6 @@ final class ReportController extends Controller
 {
     /**
      * Display a filtered, paginated report queue.
-     *
-     * @param  Request  $request
-     * @return View
      */
     public function index(Request $request): View
     {
@@ -48,9 +45,6 @@ final class ReportController extends Controller
 
     /**
      * Display a single report and its moderation context.
-     *
-     * @param  ModerationReport  $report
-     * @return View
      */
     public function show(ModerationReport $report): View
     {
@@ -67,11 +61,6 @@ final class ReportController extends Controller
 
     /**
      * Mark a new report as triaged.
-     *
-     * @param  Request  $request
-     * @param  ModerationReport  $report
-     * @param  ReportManager  $reports
-     * @return RedirectResponse
      */
     public function triage(
         Request $request,
@@ -97,18 +86,13 @@ final class ReportController extends Controller
 
     /**
      * Dismiss a report without opening a moderation case.
-     *
-     * @param  Request  $request
-     * @param  ModerationReport  $report
-     * @param  ReportManager  $reports
-     * @return RedirectResponse
      */
     public function dismiss(
         Request $request,
         ModerationReport $report,
         ReportManager $reports,
     ): RedirectResponse {
-        /// Validate the request data for dismissing a report.
+        // / Validate the request data for dismissing a report.
         $validated = $request->validate([
             'reason' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -126,11 +110,6 @@ final class ReportController extends Controller
 
     /**
      * Open a moderation case from the report.
-     *
-     * @param  Request  $request
-     * @param  ModerationReport  $report
-     * @param  CaseManager  $cases
-     * @return RedirectResponse
      */
     public function openCase(
         Request $request,

@@ -10,11 +10,6 @@ final class GateAuthorizer implements ModeratorAuthorizer
 {
     /**
      * Determine whether the given user may perform a moderation ability.
-     *
-     * @param  Authenticatable  $user
-     * @param  string  $ability
-     * @param  mixed|null  $subject
-     * @return bool
      */
     public function allows(
         Authenticatable $user,

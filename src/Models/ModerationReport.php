@@ -15,8 +15,6 @@ class ModerationReport extends Model
 
     /**
      * The name of the "sentinel" table associated with the model.
-     *
-     * @var string
      */
     protected string $sentinelTableKey = 'reports';
 
@@ -47,8 +45,6 @@ class ModerationReport extends Model
 
     /**
      * Get the user or model that submitted the report.
-     *
-     * @return MorphTo
      */
     public function reporter(): MorphTo
     {
@@ -58,8 +54,6 @@ class ModerationReport extends Model
 
     /**
      * Get the content that was reported.
-     *
-     * @return MorphTo
      */
     public function reportable(): MorphTo
     {
@@ -69,8 +63,6 @@ class ModerationReport extends Model
 
     /**
      * Get the user or model accused by the report, if applicable.
-     *
-     * @return MorphTo
      */
     public function subject(): MorphTo
     {
@@ -80,8 +72,6 @@ class ModerationReport extends Model
 
     /**
      * Get moderation cases connected to this report.
-     *
-     * @return BelongsToMany
      */
     public function cases(): BelongsToMany
     {

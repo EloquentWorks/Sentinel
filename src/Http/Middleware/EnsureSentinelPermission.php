@@ -12,7 +12,6 @@ final class EnsureSentinelPermission
     /**
      * Create a new class instance.
      *
-     * @param  ModeratorAuthorizer  $authorizer
      * @return void
      */
     public function __construct(
@@ -23,11 +22,6 @@ final class EnsureSentinelPermission
 
     /**
      * Handle an incoming request.
-     *
-     * @param  Request  $request
-     * @param  Closure  $next
-     * @param  string  $ability
-     * @return Response
      */
     public function handle(Request $request, Closure $next, string $ability): Response
     {

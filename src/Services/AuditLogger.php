@@ -10,13 +10,9 @@ final class AuditLogger
     /**
      * Record a moderation event.
      *
-     * @param  string  $event
-     * @param  Authenticatable|null  $actor
-     * @param  Model|null  $subject
      * @param  array<string, mixed>  $before
      * @param  array<string, mixed>  $after
      * @param  array<string, mixed>  $metadata
-     * @return Model|null
      */
     public function log(
         string $event,

@@ -18,16 +18,6 @@ final readonly class Sentinel
     /**
      * Create a new class instance.
      *
-     * @param  ReportManager  $reports
-     * @param  CaseManager  $cases
-     * @param  EnforcementManager  $enforcement
-     * @param  WatchlistManager  $watchlist
-     * @param  ContentHoldManager  $holds
-     * @param  AutomationEngine  $automation
-     * @param  MacroRunner  $macros
-     * @param  BulkModerationService  $bulk
-     * @param  RiskScorer  $risk
-     * @param  DashboardService  $dashboard
      * @return void
      */
     public function __construct(
@@ -47,8 +37,6 @@ final readonly class Sentinel
 
     /**
      * Return the report manager.
-     *
-     * @return ReportManager
      */
     public function reports(): ReportManager
     {
@@ -58,8 +46,6 @@ final readonly class Sentinel
 
     /**
      * Return the case manager.
-     *
-     * @return CaseManager
      */
     public function cases(): CaseManager
     {
@@ -69,8 +55,6 @@ final readonly class Sentinel
 
     /**
      * Return the enforcement manager.
-     *
-     * @return EnforcementManager
      */
     public function enforcement(): EnforcementManager
     {
@@ -80,8 +64,6 @@ final readonly class Sentinel
 
     /**
      * Return the watchlist manager.
-     *
-     * @return WatchlistManager
      */
     public function watchlist(): WatchlistManager
     {
@@ -91,8 +73,6 @@ final readonly class Sentinel
 
     /**
      * Return the content hold manager.
-     *
-     * @return ContentHoldManager
      */
     public function holds(): ContentHoldManager
     {
@@ -102,8 +82,6 @@ final readonly class Sentinel
 
     /**
      * Return the automation engine.
-     *
-     * @return AutomationEngine
      */
     public function automation(): AutomationEngine
     {
@@ -113,8 +91,6 @@ final readonly class Sentinel
 
     /**
      * Return the moderation macro runner.
-     *
-     * @return MacroRunner
      */
     public function macros(): MacroRunner
     {
@@ -124,8 +100,6 @@ final readonly class Sentinel
 
     /**
      * Return the bulk moderation service.
-     *
-     * @return BulkModerationService
      */
     public function bulk(): BulkModerationService
     {
@@ -135,8 +109,6 @@ final readonly class Sentinel
 
     /**
      * Return the risk scorer.
-     *
-     * @return RiskScorer
      */
     public function risk(): RiskScorer
     {
@@ -146,8 +118,6 @@ final readonly class Sentinel
 
     /**
      * Return the dashboard metrics service.
-     *
-     * @return DashboardService
      */
     public function dashboard(): DashboardService
     {

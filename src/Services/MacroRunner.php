@@ -13,8 +13,6 @@ final class MacroRunner
     /**
      * Create a new class instance.
      *
-     * @param  EnforcementManager  $enforcement
-     * @param  CaseManager  $cases
      * @return void
      */
     public function __construct(
@@ -27,10 +25,6 @@ final class MacroRunner
     /**
      * Execute every configured action in a moderation macro.
      *
-     * @param  ModerationMacro  $macro
-     * @param  Model  $target
-     * @param  Authenticatable  $actor
-     * @param  ModerationCase|null  $case
      * @return array<int, mixed>
      */
     public function run(

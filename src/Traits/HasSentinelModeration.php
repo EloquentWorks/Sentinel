@@ -8,8 +8,6 @@ trait HasSentinelModeration
 {
     /**
      * Get moderation reports in which this model is the subject.
-     *
-     * @return MorphMany
      */
     public function sentinelReports(): MorphMany
     {
@@ -22,8 +20,6 @@ trait HasSentinelModeration
 
     /**
      * Get moderation cases opened against this model.
-     *
-     * @return MorphMany
      */
     public function sentinelCases(): MorphMany
     {
@@ -36,8 +32,6 @@ trait HasSentinelModeration
 
     /**
      * Get moderation actions applied to this model.
-     *
-     * @return MorphMany
      */
     public function sentinelActions(): MorphMany
     {
@@ -50,8 +44,6 @@ trait HasSentinelModeration
 
     /**
      * Get watchlist entries associated with this model.
-     *
-     * @return MorphMany
      */
     public function sentinelWatchlistEntries(): MorphMany
     {

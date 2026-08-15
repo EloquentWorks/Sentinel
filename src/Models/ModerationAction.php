@@ -15,8 +15,6 @@ class ModerationAction extends Model
 
     /**
      * The name of the table associated with the model.
-     *
-     * @var string
      */
     protected string $sentinelTableKey = 'actions';
 
@@ -47,8 +45,6 @@ class ModerationAction extends Model
 
     /**
      * Get the moderation case associated with the action.
-     *
-     * @return BelongsTo
      */
     public function case(): BelongsTo
     {
@@ -61,8 +57,6 @@ class ModerationAction extends Model
 
     /**
      * Get the moderator who initiated the action.
-     *
-     * @return MorphTo
      */
     public function actor(): MorphTo
     {
@@ -72,8 +66,6 @@ class ModerationAction extends Model
 
     /**
      * Get the user or model targeted by the action.
-     *
-     * @return MorphTo
      */
     public function target(): MorphTo
     {
@@ -83,8 +75,6 @@ class ModerationAction extends Model
 
     /**
      * Get the external Exile or Masquerade model created by the action.
-     *
-     * @return MorphTo
      */
     public function external(): MorphTo
     {

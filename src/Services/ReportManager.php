@@ -16,7 +16,6 @@ final class ReportManager
     /**
      * Create a new class instance.
      *
-     * @param  AuditLogger  $audit
      * @return void
      */
     public function __construct(
@@ -28,16 +27,7 @@ final class ReportManager
     /**
      * Create a new moderation report.
      *
-     * @param  Model  $reportable
-     * @param  Authenticatable|null  $reporter
-     * @param  Model|null  $subject
-     * @param  string  $category
-     * @param  string|null  $reason
-     * @param  string|null  $description
-     * @param  Priority|string  $priority
-     * @param  string  $source
      * @param  array<string, mixed>  $metadata
-     * @return ModerationReport
      */
     public function create(
         Model $reportable,
@@ -83,7 +73,7 @@ final class ReportManager
             auditable: $report,
             metadata: ['category' => $category],
         );
-        
+
         // Fire the ReportCreated event to notify listeners of the new report.
         event(new ReportCreated($report));
 
@@ -93,11 +83,6 @@ final class ReportManager
 
     /**
      * Mark a report as triaged and optionally change its priority.
-     *
-     * @param  ModerationReport  $report
-     * @param  Authenticatable  $moderator
-     * @param  Priority|null  $priority
-     * @return ModerationReport
      */
     public function triage(
         ModerationReport $report,
@@ -135,11 +120,6 @@ final class ReportManager
 
     /**
      * Dismiss a report with an optional resolution reason.
-     *
-     * @param  ModerationReport  $report
-     * @param  Authenticatable  $moderator
-     * @param  string|null  $reason
-     * @return ModerationReport
      */
     public function dismiss(
         ModerationReport $report,
@@ -175,11 +155,6 @@ final class ReportManager
 
     /**
      * Mark a report as a duplicate of another report.
-     *
-     * @param  ModerationReport  $report
-     * @param  ModerationReport  $original
-     * @param  Authenticatable  $moderator
-     * @return ModerationReport
      */
     public function markDuplicate(
         ModerationReport $report,

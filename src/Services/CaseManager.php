@@ -21,7 +21,6 @@ final class CaseManager
     /**
      * Create a new class instance.
      *
-     * @param  AuditLogger  $audit
      * @return void
      */
     public function __construct(
@@ -33,14 +32,8 @@ final class CaseManager
     /**
      * Open a new moderation case.
      *
-     * @param  Model|null  $subject
-     * @param  string  $title
-     * @param  Priority|string  $priority
-     * @param  Authenticatable|null  $openedBy
-     * @param  string|null  $queue
      * @param  array<int, string>  $tags
      * @param  array<string, mixed>  $metadata
-     * @return ModerationCase
      */
     public function open(
         ?Model $subject,
@@ -85,10 +78,6 @@ final class CaseManager
 
     /**
      * Open a moderation case from an existing report.
-     *
-     * @param  ModerationReport  $report
-     * @param  Authenticatable|null  $openedBy
-     * @return ModerationCase
      */
     public function fromReport(
         ModerationReport $report,
@@ -113,11 +102,6 @@ final class CaseManager
 
     /**
      * Attach an additional report to a moderation case.
-     *
-     * @param  ModerationCase  $case
-     * @param  ModerationReport  $report
-     * @param  Authenticatable|null  $actor
-     * @return void
      */
     public function attachReport(
         ModerationCase $case,
@@ -139,11 +123,6 @@ final class CaseManager
 
     /**
      * Assign a moderator to a case, releasing the previous active assignment.
-     *
-     * @param  ModerationCase  $case
-     * @param  Authenticatable  $moderator
-     * @param  Authenticatable|null  $assignedBy
-     * @return CaseAssignment
      */
     public function assign(
         ModerationCase $case,
@@ -195,12 +174,7 @@ final class CaseManager
     /**
      * Add a note to a moderation case.
      *
-     * @param  ModerationCase  $case
-     * @param  Authenticatable  $author
-     * @param  string  $body
-     * @param  string  $visibility
      * @param  array<string, mixed>  $metadata
-     * @return CaseNote
      */
     public function note(
         ModerationCase $case,
@@ -238,11 +212,6 @@ final class CaseManager
 
     /**
      * Resolve a moderation case and release its active assignment.
-     *
-     * @param  ModerationCase  $case
-     * @param  Authenticatable  $actor
-     * @param  string  $resolution
-     * @return ModerationCase
      */
     public function resolve(
         ModerationCase $case,
@@ -289,12 +258,6 @@ final class CaseManager
 
     /**
      * Escalate a case to a higher priority or moderation queue.
-     *
-     * @param  ModerationCase  $case
-     * @param  Authenticatable  $actor
-     * @param  Priority  $priority
-     * @param  string|null  $queue
-     * @return ModerationCase
      */
     public function escalate(
         ModerationCase $case,

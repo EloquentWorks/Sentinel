@@ -10,10 +10,6 @@ final class UserModerationController extends Controller
 {
     /**
      * Display reports, cases, actions, watchlist entries, and a risk score.
-     *
-     * @param  string  $user
-     * @param  RiskScorer  $risk
-     * @return View
      */
     public function show(string $user, RiskScorer $risk): View
     {

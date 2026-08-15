@@ -30,8 +30,6 @@ final class SentinelServiceProvider extends ServiceProvider
 {
     /**
      * Register package bindings and merge default configuration.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -69,9 +67,6 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap views, routes, events, middleware, publishing, and commands.
-     *
-     * @param  Router  $router
-     * @return void
      */
     public function boot(Router $router): void
     {
@@ -86,8 +81,6 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Register package Blade views.
-     *
-     * @return void
      */
     private function registerViews(): void
     {
@@ -100,9 +93,6 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Register Sentinel route middleware aliases.
-     *
-     * @param  Router  $router
-     * @return void
      */
     private function registerMiddleware(Router $router): void
     {
@@ -121,8 +111,6 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Register the optional built-in moderation routes.
-     *
-     * @return void
      */
     private function registerRoutes(): void
     {
@@ -140,8 +128,6 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Register Sentinel and external package event listeners.
-     *
-     * @return void
      */
     private function registerEventListeners(): void
     {
@@ -191,8 +177,6 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Register publishable package resources.
-     *
-     * @return void
      */
     private function registerPublishing(): void
     {
@@ -214,8 +198,6 @@ final class SentinelServiceProvider extends ServiceProvider
 
     /**
      * Register Sentinel Artisan commands for console applications.
-     *
-     * @return void
      */
     private function registerCommands(): void
     {

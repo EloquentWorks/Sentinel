@@ -12,11 +12,6 @@ final class WatchlistController extends Controller
 {
     /**
      * Add a user to the moderation watchlist.
-     *
-     * @param  Request  $request
-     * @param  string  $user
-     * @param  WatchlistManager  $watchlist
-     * @return RedirectResponse
      */
     public function store(
         Request $request,
@@ -38,7 +33,7 @@ final class WatchlistController extends Controller
         $expiresAt = isset($validated['days'])
             ? now()->addDays((int) $validated['days'])
             : null;
-        
+
         // Add the user to the watchlist with the provided details
         $watchlist->add(
             subject: $target,
@@ -47,7 +42,7 @@ final class WatchlistController extends Controller
             severity: WatchSeverity::from($validated['severity']),
             expiresAt: $expiresAt,
         );
-        
+
         // Redirect back with a success message
         return back()->with('status', 'User added to watchlist.');
     }

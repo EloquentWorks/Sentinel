@@ -50,10 +50,7 @@
     "autoload": {
         "psr-4": {
             "EloquentWorks\\Sentinel\\": "src/"
-        },
-        "files": [
-            "src/helpers.php"
-        ]
+        }
     },
     "autoload-dev": {
         "psr-4": {

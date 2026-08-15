@@ -14,12 +14,6 @@ final class ExileGateway
 {
     /**
      * Issue a warning against a bannable model.
-     *
-     * @param  Model  $target
-     * @param  string  $reason
-     * @param  string  $severity
-     * @param  Authenticatable|null  $moderator
-     * @return mixed
      */
     public function warn(
         Model $target,
@@ -44,13 +38,6 @@ final class ExileGateway
 
     /**
      * Add strike points to a model.
-     *
-     * @param  Model  $target
-     * @param  string  $reason
-     * @param  int  $points
-     * @param  string  $category
-     * @param  Authenticatable|null  $moderator
-     * @return mixed
      */
     public function strike(
         Model $target,
@@ -70,15 +57,6 @@ final class ExileGateway
 
     /**
      * Ban a model temporarily or permanently.
-     *
-     * @param  Model  $target
-     * @param  string  $reason
-     * @param  mixed  $expiresAt
-     * @param  Authenticatable|null  $moderator
-     * @param  string  $category
-     * @param  string|null  $internalNotes
-     * @param  array  $metadata
-     * @return mixed
      */
     public function ban(
         Model $target,
@@ -102,13 +80,6 @@ final class ExileGateway
 
     /**
      * Apply a supported Exile restriction to a model.
-     *
-     * @param  Model  $target
-     * @param  string  $type
-     * @param  string  $reason
-     * @param  mixed  $expiresAt
-     * @param  Authenticatable|null  $moderator
-     * @return mixed
      */
     public function restrict(
         Model $target,
@@ -127,7 +98,7 @@ final class ExileGateway
                 "Unknown Exile restriction [{$type}]."
             ),
         };
-        
+
         // Call the restrict method on the target model with the provided parameters.
         return $target->restrict(
             $restrictionType,
@@ -139,12 +110,6 @@ final class ExileGateway
 
     /**
      * Ban an individual IP address.
-     *
-     * @param  string  $ip
-     * @param  string  $reason
-     * @param  mixed  $expiresAt
-     * @param  Authenticatable|null  $moderator
-     * @return mixed
      */
     public function banIp(
         string $ip,
@@ -163,12 +128,6 @@ final class ExileGateway
 
     /**
      * Ban a CIDR network range.
-     *
-     * @param  string  $cidr
-     * @param  string  $reason
-     * @param  mixed  $expiresAt
-     * @param  Authenticatable|null  $moderator
-     * @return mixed
      */
     public function banNetwork(
         string $cidr,
@@ -187,12 +146,6 @@ final class ExileGateway
 
     /**
      * Ban a device fingerprint through Exile.
-     *
-     * @param  string  $fingerprint
-     * @param  string  $reason
-     * @param  mixed  $expiresAt
-     * @param  Authenticatable|null  $moderator
-     * @return mixed
      */
     public function banDevice(
         string $fingerprint,
@@ -211,13 +164,6 @@ final class ExileGateway
 
     /**
      * Ban an account and IP address in one moderation operation.
-     *
-     * @param  Model  $target
-     * @param  string  $ip
-     * @param  string  $reason
-     * @param  mixed  $expiresAt
-     * @param  Authenticatable|null  $moderator
-     * @return mixed
      */
     public function banAccountAndIp(
         Model $target,
@@ -238,10 +184,6 @@ final class ExileGateway
 
     /**
      * Revoke an existing Exile ban.
-     *
-     * @param  Model  $ban
-     * @param  Authenticatable|null  $moderator
-     * @return mixed
      */
     public function revokeBan(
         Model $ban,
@@ -253,10 +195,6 @@ final class ExileGateway
 
     /**
      * Revoke an existing Exile restriction.
-     *
-     * @param  Model  $restriction
-     * @param  Authenticatable|null  $moderator
-     * @return mixed
      */
     public function revokeRestriction(
         Model $restriction,
@@ -268,10 +206,6 @@ final class ExileGateway
 
     /**
      * Revoke an existing Exile strike.
-     *
-     * @param  Model  $strike
-     * @param  Authenticatable|null  $moderator
-     * @return mixed
      */
     public function revokeStrike(
         Model $strike,
@@ -283,12 +217,6 @@ final class ExileGateway
 
     /**
      * Resolve an Exile appeal using a supported appeal status.
-     *
-     * @param  Model  $appeal
-     * @param  string  $status
-     * @param  Authenticatable  $reviewer
-     * @param  string|null  $notes
-     * @return mixed
      */
     public function resolveAppeal(
         Model $appeal,

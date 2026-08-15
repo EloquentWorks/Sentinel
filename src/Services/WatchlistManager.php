@@ -14,7 +14,6 @@ final class WatchlistManager
     /**
      * Create a new class instance.
      *
-     * @param  AuditLogger  $audit
      * @return void
      */
     public function __construct(
@@ -26,13 +25,7 @@ final class WatchlistManager
     /**
      * Add a model to Sentinel's watchlist.
      *
-     * @param  Model  $subject
-     * @param  Authenticatable  $actor
-     * @param  string  $reason
-     * @param  WatchSeverity|string  $severity
-     * @param  mixed  $expiresAt
      * @param  array<string, mixed>  $metadata
-     * @return WatchlistEntry
      */
     public function add(
         Model $subject,
@@ -76,10 +69,6 @@ final class WatchlistManager
 
     /**
      * Remove an entry from the active watchlist while retaining history.
-     *
-     * @param  WatchlistEntry  $entry
-     * @param  Authenticatable  $actor
-     * @return void
      */
     public function remove(
         WatchlistEntry $entry,

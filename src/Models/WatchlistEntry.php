@@ -13,8 +13,6 @@ class WatchlistEntry extends Model
 
     /**
      * The name of the "sentinel" table associated with the model.
-     *
-     * @var string
      */
     protected string $sentinelTableKey = 'watchlist';
 
@@ -43,8 +41,6 @@ class WatchlistEntry extends Model
 
     /**
      * Get the subject placed on the watchlist.
-     *
-     * @return MorphTo
      */
     public function subject(): MorphTo
     {
@@ -54,8 +50,6 @@ class WatchlistEntry extends Model
 
     /**
      * Get the staff member who created the watchlist entry.
-     *
-     * @return MorphTo
      */
     public function addedBy(): MorphTo
     {

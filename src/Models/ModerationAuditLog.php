@@ -19,8 +19,6 @@ class ModerationAuditLog extends Model
 
     /**
      * The name of the "created at" column.
-     *
-     * @var string
      */
     protected string $sentinelTableKey = 'audit';
 
@@ -49,8 +47,6 @@ class ModerationAuditLog extends Model
 
     /**
      * Get the staff member who caused the audited event.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
     public function actor(): MorphTo
     {
@@ -61,8 +57,6 @@ class ModerationAuditLog extends Model
 
     /**
      * Get the subject affected by the audited event.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
     public function subject(): MorphTo
     {
@@ -73,8 +67,6 @@ class ModerationAuditLog extends Model
 
     /**
      * Get the Sentinel or external model associated with the audit event.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
     public function auditable(): MorphTo
     {

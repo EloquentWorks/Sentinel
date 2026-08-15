@@ -10,7 +10,6 @@ final class ExternalModerationEventRecorder
     /**
      * Create a new class instance.
      *
-     * @param  AuditLogger  $audit
      * @return void
      */
     public function __construct(
@@ -21,9 +20,6 @@ final class ExternalModerationEventRecorder
 
     /**
      * Record a package event without coupling Sentinel to every event class.
-     *
-     * @param  object  $event
-     * @return void
      */
     public function handle(object $event): void
     {

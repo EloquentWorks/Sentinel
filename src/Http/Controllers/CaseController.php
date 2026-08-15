@@ -15,9 +15,6 @@ final class CaseController extends Controller
 {
     /**
      * Display a paginated list of moderation cases.
-     *
-     * @param  Request  $request
-     * @return View
      */
     public function index(Request $request): View
     {
@@ -49,10 +46,6 @@ final class CaseController extends Controller
 
     /**
      * Display a single moderation case with its related records.
-     *
-     * @param  ModerationCase  $case
-     * @param  RiskScorer  $risk
-     * @return View
      */
     public function show(ModerationCase $case, RiskScorer $risk): View
     {
@@ -79,11 +72,6 @@ final class CaseController extends Controller
 
     /**
      * Add an internal note to a moderation case.
-     *
-     * @param  Request  $request
-     * @param  ModerationCase  $case
-     * @param  CaseManager  $cases
-     * @return RedirectResponse
      */
     public function note(
         Request $request,
@@ -104,11 +92,6 @@ final class CaseController extends Controller
 
     /**
      * Resolve a moderation case.
-     *
-     * @param  Request  $request
-     * @param  ModerationCase  $case
-     * @param  CaseManager  $cases
-     * @return RedirectResponse
      */
     public function resolve(
         Request $request,
@@ -130,11 +113,6 @@ final class CaseController extends Controller
 
     /**
      * Escalate a moderation case to a higher priority or queue.
-     *
-     * @param  Request  $request
-     * @param  ModerationCase  $case
-     * @param  CaseManager  $cases
-     * @return RedirectResponse
      */
     public function escalate(
         Request $request,

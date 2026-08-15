@@ -13,11 +13,6 @@ final class EnforcementController extends Controller
 {
     /**
      * Issue a warning through Exile.
-     *
-     * @param  Request  $request
-     * @param  string  $user
-     * @param  EnforcementManager  $enforcement
-     * @return RedirectResponse
      */
     public function warn(
         Request $request,
@@ -46,11 +41,6 @@ final class EnforcementController extends Controller
 
     /**
      * Issue strike points through Exile.
-     *
-     * @param  Request  $request
-     * @param  string  $user
-     * @param  EnforcementManager  $enforcement
-     * @return RedirectResponse
      */
     public function strike(
         Request $request,
@@ -81,11 +71,6 @@ final class EnforcementController extends Controller
 
     /**
      * Ban a user through Exile.
-     *
-     * @param  Request  $request
-     * @param  string  $user
-     * @param  EnforcementManager  $enforcement
-     * @return RedirectResponse
      */
     public function ban(
         Request $request,
@@ -121,11 +106,6 @@ final class EnforcementController extends Controller
 
     /**
      * Apply a temporary or permanent account restriction through Exile.
-     *
-     * @param  Request  $request
-     * @param  string  $user
-     * @param  EnforcementManager  $enforcement
-     * @return RedirectResponse
      */
     public function restrict(
         Request $request,
@@ -161,11 +141,6 @@ final class EnforcementController extends Controller
 
     /**
      * Start a support impersonation session through Masquerade.
-     *
-     * @param  Request  $request
-     * @param  string  $user
-     * @param  EnforcementManager  $enforcement
-     * @return RedirectResponse
      */
     public function masquerade(
         Request $request,
@@ -192,9 +167,6 @@ final class EnforcementController extends Controller
 
     /**
      * Resolve a user model from the host application's configured user model.
-     *
-     * @param  string|int  $id
-     * @return Model
      */
     private function target(string|int $id): Model
     {
@@ -207,9 +179,6 @@ final class EnforcementController extends Controller
 
     /**
      * Resolve an optional moderation case submitted by the form.
-     *
-     * @param  int|string|null  $id
-     * @return ModerationCase|null
      */
     private function case(int|string|null $id): ?ModerationCase
     {

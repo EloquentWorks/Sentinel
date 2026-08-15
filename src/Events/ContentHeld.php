@@ -9,7 +9,6 @@ final readonly class ContentHeld
     /**
      * Create a new event instance.
      *
-     * @param  ContentHold  $hold
      * @return void
      */
     public function __construct(
