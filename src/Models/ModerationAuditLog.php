@@ -18,9 +18,12 @@ class ModerationAuditLog extends Model
     public $timestamps = false;
 
     /**
-     * The name of the "created at" column.
+     * Get the Sentinel table configuration key.
      */
-    protected string $sentinelTableKey = 'audit';
+    protected function sentinelTableKey(): string
+    {
+        return 'audit';
+    }
 
     /**
      * The attributes that are not mass assignable.

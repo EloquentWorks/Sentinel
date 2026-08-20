@@ -15,9 +15,12 @@ class ModerationCase extends Model
     use UsesSentinelTable;
 
     /**
-     * The name of the "sentinel" table associated with the model.
+     * Get the Sentinel table configuration key.
      */
-    protected string $sentinelTableKey = 'cases';
+    protected function sentinelTableKey(): string
+    {
+        return 'cases';
+    }
 
     /**
      * The attributes that are not mass assignable.

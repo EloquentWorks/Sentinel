@@ -12,9 +12,12 @@ class CaseAssignment extends Model
     use UsesSentinelTable;
 
     /**
-     * The name of the "sentinel" table key for this model.
+     * Get the Sentinel table configuration key.
      */
-    protected string $sentinelTableKey = 'assignments';
+    protected function sentinelTableKey(): string
+    {
+        return 'assignments';
+    }
 
     /**
      * The guarded attributes.

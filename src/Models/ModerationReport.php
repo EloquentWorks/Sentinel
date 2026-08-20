@@ -14,9 +14,12 @@ class ModerationReport extends Model
     use UsesSentinelTable;
 
     /**
-     * The name of the "sentinel" table associated with the model.
+     * Get the Sentinel table configuration key.
      */
-    protected string $sentinelTableKey = 'reports';
+    protected function sentinelTableKey(): string
+    {
+        return 'reports';
+    }
 
     /**
      * The attributes that are not mass assignable.

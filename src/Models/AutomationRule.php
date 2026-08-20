@@ -10,9 +10,12 @@ class AutomationRule extends Model
     use UsesSentinelTable;
 
     /**
-     * The name of the "sentinel" table key for this model.
+     * Get the Sentinel table configuration key.
      */
-    protected string $sentinelTableKey = 'rules';
+    protected function sentinelTableKey(): string
+    {
+        return 'rules';
+    }
 
     /**
      * The guarded attributes.

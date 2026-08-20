@@ -11,9 +11,12 @@ class ContentHold extends Model
     use UsesSentinelTable;
 
     /**
-     * The table associated with the model.
+     * Get the Sentinel table configuration key.
      */
-    protected string $sentinelTableKey = 'holds';
+    protected function sentinelTableKey(): string
+    {
+        return 'holds';
+    }
 
     /**
      * The guarded attributes.

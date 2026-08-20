@@ -14,9 +14,12 @@ class ModerationAction extends Model
     use UsesSentinelTable;
 
     /**
-     * The name of the table associated with the model.
+     * Get the Sentinel table configuration key.
      */
-    protected string $sentinelTableKey = 'actions';
+    protected function sentinelTableKey(): string
+    {
+        return 'actions';
+    }
 
     /**
      * The attributes that are guarded from mass assignment.

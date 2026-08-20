@@ -12,9 +12,12 @@ class WatchlistEntry extends Model
     use UsesSentinelTable;
 
     /**
-     * The name of the "sentinel" table associated with the model.
+     * Get the Sentinel table configuration key.
      */
-    protected string $sentinelTableKey = 'watchlist';
+    protected function sentinelTableKey(): string
+    {
+        return 'watchlist';
+    }
 
     /**
      * The attributes that are not mass assignable.

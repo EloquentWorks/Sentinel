@@ -5,19 +5,24 @@ namespace EloquentWorks\Sentinel\Models\Concerns;
 trait UsesSentinelTable
 {
     /**
-     * Configuration key under sentinel.tables for the model.
+     * Get the configuration key under sentinel.tables for this model.
      */
-    protected string $sentinelTableKey = '';
+    abstract protected function sentinelTableKey(): string;
 
     /**
      * Get the table associated with the model.
      */
     public function getTable(): string
     {
-        // If the sentinelTableKey is not set, fall back to the default table name.
-        return config(
-            'sentinel.tables.'.$this->sentinelTableKey,
-            parent::getTable(),
+        // Check if the table is defined in the sentinel configuration
+        $table = config(
+            'sentinel.tables.'.$this->sentinelTableKey()
         );
+
+        // If the table is defined and is a non-empty string, return it; otherwise,
+        // fall back to the parent implementation
+        return is_string($table) && $table !== ''
+            ? $table
+            : parent::getTable();
     }
 }

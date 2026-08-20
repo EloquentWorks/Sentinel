@@ -11,9 +11,12 @@ class ModerationMacro extends Model
     use UsesSentinelTable;
 
     /**
-     * The name of the "sentinel" table associated with the model.
+     * Get the Sentinel table configuration key.
      */
-    protected string $sentinelTableKey = 'macros';
+    protected function sentinelTableKey(): string
+    {
+        return 'macros';
+    }
 
     /**
      * The attributes that are not mass assignable.
